@@ -1,6 +1,7 @@
 const $ = id => document.getElementById(id);
 let items = JSON.parse(localStorage.getItem("td-items") || "[]");
 let connections = JSON.parse(localStorage.getItem("td-connections") || "[]");
+let investigations = JSON.parse(localStorage.getItem("td-investigations") || "[]");
 
 // Give older evidence records stable IDs so connections survive refreshes.
 items.forEach((item, index) => { if (!item.id) item.id = "legacy-" + index; });
@@ -114,53 +115,165 @@ draw();
 
 // AI investigator — calls the Cloudflare Worker; the API key never reaches the browser.
 const DETECTIVE_API = "https://truth-detective-ai.garethedmond73.workers.dev/ask";
+let latestInvestigation = null;
+
+function saveInvestigations() {
+  localStorage.setItem("td-investigations", JSON.stringify(investigations));
+}
+function renderCitations(container, citations) {
+  if (!Array.isArray(citations) || !citations.length) return;
+  const heading = document.createElement("h3");
+  heading.textContent = "Sources";
+  container.appendChild(heading);
+  const list = document.createElement("ul");
+  citations.forEach(source => {
+    if (!source.url || !/^https?:\\/\\//i.test(source.url)) return;
+    const li = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = source.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = source.title || source.url;
+    li.appendChild(link);
+    list.appendChild(li);
+  });
+  if (list.children.length) container.appendChild(list);
+}
+function renderInvestigationArchive() {
+  const host = $("investigationArchive");
+  if (!host) return;
+  if (!investigations.length) {
+    host.innerHTML = '<p class="small-note">Saved investigations will appear here on this device.</p>';
+    return;
+  }
+  host.innerHTML = investigations.slice().reverse().map(record => `
+    <article class="archive-card">
+      <strong>${esc(record.question)}</strong>
+      <p class="archive-meta">${esc(new Date(record.createdAt).toLocaleString())} · ${esc(record.type || "Investigation")}</p>
+      <p class="archive-preview">${esc(record.answer.slice(0, 420))}${record.answer.length > 420 ? "…" : ""}</p>
+      <button class="secondary" onclick="addInvestigationToLedger('${esc(record.id)}')">Add to evidence ledger</button>
+    </article>`).join("");
+}
+function showInvestigation(record, showActions = true) {
+  const answerBox = $("detectiveAnswer");
+  answerBox.replaceChildren();
+  const answerText = document.createElement("div");
+  answerText.className = "detective-answer-text";
+  answerText.textContent = record.answer;
+  answerBox.appendChild(answerText);
+  renderCitations(answerBox, record.citations);
+  if (showActions) {
+    const actions = document.createElement("div");
+    actions.className = "investigation-actions";
+    const saveButton = document.createElement("button");
+    saveButton.type = "button";
+    saveButton.textContent = "Save investigation";
+    saveButton.onclick = () => {
+      if (investigations.some(item => item.id === record.id)) {
+        saveButton.textContent = "Already saved";
+        return;
+      }
+      investigations.push(record);
+      saveInvestigations();
+      renderInvestigationArchive();
+      saveButton.textContent = "Saved to archive";
+    };
+    const compareButton = document.createElement("button");
+    compareButton.type = "button";
+    compareButton.className = "secondary";
+    compareButton.textContent = "Compare explanations";
+    compareButton.onclick = () => compareExplanations(record);
+    actions.append(saveButton, compareButton);
+    answerBox.appendChild(actions);
+  }
+}
+function addInvestigationToLedger(id) {
+  const record = investigations.find(item => item.id === id);
+  if (!record) return;
+  if (items.some(item => item.investigationId === id)) {
+    alert("This investigation is already in your evidence ledger.");
+    return;
+  }
+  items.push({
+    id: "e-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
+    investigationId: id,
+    claim: "Investigation: " + record.question,
+    kind: "AI investigation",
+    status: "Provisional",
+    source: (record.citations || []).map(source => source.title || source.url).join("; ") || "AI-generated synthesis — sources not returned",
+    pattern: "",
+    meaning: "",
+    alternative: "",
+    support: record.answer,
+    challenge: "This is an AI-generated synthesis, not verified evidence. Check the cited sources and record counter-evidence separately."
+  });
+  saveAll();
+  draw();
+  alert("Investigation added to the evidence ledger as provisional. You can now connect it to other evidence.");
+}
+window.addInvestigationToLedger = addInvestigationToLedger;
+
+async function requestInvestigation(question, type = "Investigation") {
+  const answerBox = $("detectiveAnswer");
+  const askButton = $("askButton");
+  askButton.disabled = true;
+  askButton.textContent = type === "Comparison" ? "Comparing…" : "Investigating…";
+  answerBox.textContent = type === "Comparison"
+    ? "The detective is comparing competing explanations…"
+    : "The detective is examining the evidence. This may take a little while…";
+  try {
+    const response = await fetch(DETECTIVE_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question })
+    });
+    let data;
+    try { data = await response.json(); }
+    catch { throw new Error("The AI service returned an unreadable response. Please try again."); }
+    if (!response.ok) throw new Error(data.error || "The investigation could not be completed.");
+    if (!data.answer) throw new Error("The detective returned an empty answer. Please try again.");
+    const record = {
+      id: "i-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
+      question,
+      answer: data.answer,
+      citations: Array.isArray(data.citations) ? data.citations : [],
+      createdAt: new Date().toISOString(),
+      type
+    };
+    latestInvestigation = record;
+    showInvestigation(record);
+    return record;
+  } catch (error) {
+    answerBox.textContent = "Investigation error: " + error.message;
+    return null;
+  } finally {
+    askButton.disabled = false;
+    askButton.textContent = "Investigate";
+  }
+}
+async function compareExplanations(record) {
+  const comparisonQuestion = `Compare the competing explanations for this question:
+${record.question}
+
+Here is the previous investigation to use as context (treat it as provisional, not as established fact):
+${record.answer.slice(0, 14000)}
+
+Identify the main competing explanations. For each, give its strongest supporting evidence, strongest objections, assumptions, and what observation or research could distinguish it from the others. Separate established findings from interpretation and speculation. Do not force a single conclusion if the evidence is inconclusive. Cite checkable sources.`;
+  const result = await requestInvestigation(comparisonQuestion, "Comparison");
+  if (result) {
+    const save = document.createElement("p");
+    save.className = "small-note";
+    save.textContent = "This comparison can be saved to the investigation archive and added to the evidence ledger.";
+    $("detectiveAnswer").appendChild(save);
+  }
+}
 const askForm = $("askForm");
 if (askForm) {
   askForm.addEventListener("submit", async event => {
     event.preventDefault();
     const question = $("detectiveQuestion").value.trim();
-    const answerBox = $("detectiveAnswer");
-    const askButton = $("askButton");
     if (!question) return;
-    askButton.disabled = true;
-    askButton.textContent = "Investigating…";
-    answerBox.textContent = "The detective is examining the evidence. This may take a little while…";
-    try {
-      const response = await fetch(DETECTIVE_API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "The investigation could not be completed.");
-      answerBox.replaceChildren();
-      const answerText = document.createElement("div");
-      answerText.className = "detective-answer-text";
-      answerText.textContent = data.answer || "No answer was returned.";
-      answerBox.appendChild(answerText);
-      if (Array.isArray(data.citations) && data.citations.length) {
-        const heading = document.createElement("h3");
-        heading.textContent = "Sources";
-        answerBox.appendChild(heading);
-        const list = document.createElement("ul");
-        data.citations.forEach(source => {
-          if (!source.url || !/^https?:\/\//i.test(source.url)) return;
-          const item = document.createElement("li");
-          const link = document.createElement("a");
-          link.href = source.url;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          link.textContent = source.title || source.url;
-          item.appendChild(link);
-          list.appendChild(item);
-        });
-        if (list.children.length) answerBox.appendChild(list);
-      }
-    } catch (error) {
-      answerBox.textContent = "Investigation error: " + error.message;
-    } finally {
-      askButton.disabled = false;
-      askButton.textContent = "Investigate";
-    }
+    await requestInvestigation(question);
   });
 }
+renderInvestigationArchive();
