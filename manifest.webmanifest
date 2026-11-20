@@ -1,1 +1,19 @@
-{"name":"The Truth Detective","short_name":"Truth Detective","start_url":"./","display":"standalone","background_color":"#101820","theme_color":"#101820"}
+{
+  "name": "The Truth Detective",
+  "short_name": "Truth Detective",
+  "description": "An open-minded investigation into big questions.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#101820",
+  "theme_color": "#101820",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
