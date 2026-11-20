@@ -123,19 +123,30 @@ function investigationDisplayTitle(record) {
 }
 
 function draw() {
-  $("items").innerHTML = items.map(item => `
-    <article class="evidence-card">
-      <b>${esc(item.investigationId ? investigationDisplayTitle(investigations.find(record => record.id === item.investigationId)) : item.claim)}</b>
-      <p>${esc(item.kind)} · ${esc(item.status)}</p>
-      <p><strong>Source:</strong> ${readableEvidenceField("Source",item.source)}</p>
-      ${item.pattern ? `<p><strong>Observed pattern:</strong> ${readableEvidenceField("Observed pattern",item.pattern)}</p>` : ""}
-      ${item.meaning ? `<p><strong>Possible meaning:</strong> ${readableEvidenceField("Possible meaning",item.meaning)}</p>` : ""}
-      ${item.alternative ? `<p><strong>Alternative explanation:</strong> ${readableEvidenceField("Alternative explanation",item.alternative)}</p>` : ""}
-      <p><strong>Supports:</strong> ${readableEvidenceField("Supporting evidence",item.support)}</p>
-      <p><strong>Challenges:</strong> ${readableEvidenceField("Challenges",item.challenge)}</p>
-      <button class="secondary" onclick="removeItem('${esc(item.id)}')">Delete evidence</button>
-    </article>
-  `).join("");
+  $("items").innerHTML = items.map(item => {
+    const title = item.investigationId
+      ? investigationDisplayTitle(investigations.find(record => record.id === item.investigationId))
+      : item.claim;
+    return `
+      <article class="evidence-card">
+        <div class="evidence-card-heading">
+          <b>${esc(title)}</b>
+          <p class="evidence-meta">${esc(item.kind)} · ${esc(item.status)}</p>
+        </div>
+        <details class="evidence-details">
+          <summary>Read evidence details</summary>
+          <div class="evidence-details-content">
+            <p><strong>Source:</strong> ${readableEvidenceField("Source",item.source)}</p>
+            ${item.pattern ? `<p><strong>Observed pattern:</strong> ${readableEvidenceField("Observed pattern",item.pattern)}</p>` : ""}
+            ${item.meaning ? `<p><strong>Possible meaning:</strong> ${readableEvidenceField("Possible meaning",item.meaning)}</p>` : ""}
+            ${item.alternative ? `<p><strong>Alternative explanation:</strong> ${readableEvidenceField("Alternative explanation",item.alternative)}</p>` : ""}
+            <p><strong>Supports:</strong> ${readableEvidenceField("Supporting evidence",item.support)}</p>
+            <p><strong>Challenges:</strong> ${readableEvidenceField("Challenges",item.challenge)}</p>
+            <button class="secondary" onclick="removeItem('${esc(item.id)}')">Delete evidence</button>
+          </div>
+        </details>
+      </article>`;
+  }).join("");
   drawConnectionSelectors();
   drawConnections();
   if (!$("networkExplorer").hidden) { fillPathSelectors(); drawNetworkGraph([]); }
@@ -201,17 +212,30 @@ function drawConnections() {
   host.innerHTML = connections.map(link => {
     const a = evidenceById(link.from), b = evidenceById(link.to);
     if (!a || !b) return "";
+    const strength = String(link.strength || "Tentative");
     return `
       <article class="connection-card">
-        <div class="connection-nodes">
-          <div class="map-node"><span>${esc(a.kind)}</span><strong>${esc(a.claim)}</strong></div>
-          <div class="link-bridge"><span class="bridge-line"></span><span class="bridge-label">CONNECTED BY</span><span class="bridge-line"></span></div>
-          <div class="map-node"><span>${esc(b.kind)}</span><strong>${esc(b.claim)}</strong></div>
+        <div class="connection-card-heading">
+          <div class="connection-short-title">
+            <span>${esc(a.kind)} · ${esc(a.claim)}</span>
+            <span class="connection-arrow" aria-hidden="true">↔</span>
+            <span>${esc(b.kind)} · ${esc(b.claim)}</span>
+          </div>
+          <span class="strength strength-${esc(strength.toLowerCase())}">${esc(strength)}</span>
         </div>
-        <p class="connection-idea"><strong>Possible connection:</strong> ${esc(link.text)}</p>
-        ${link.reason ? `<p><strong>Why it may matter:</strong> ${esc(link.reason)}</p>` : ""}
-        <span class="strength strength-${link.strength.toLowerCase()}">${esc(link.strength)}</span>
-        <button class="secondary delete-link" onclick="removeConnection('${esc(link.id)}')">Remove connection</button>
+        <details class="connection-details">
+          <summary>View connection details</summary>
+          <div class="connection-details-content">
+            <div class="connection-nodes">
+              <div class="map-node"><span>${esc(a.kind)}</span><strong>${esc(a.claim)}</strong></div>
+              <div class="link-bridge"><span class="bridge-line"></span><span class="bridge-label">CONNECTED BY</span><span class="bridge-line"></span></div>
+              <div class="map-node"><span>${esc(b.kind)}</span><strong>${esc(b.claim)}</strong></div>
+            </div>
+            <p class="connection-idea"><strong>Possible connection:</strong> ${esc(link.text)}</p>
+            ${link.reason ? `<p><strong>Why it may matter:</strong> ${esc(link.reason)}</p>` : ""}
+            <button class="secondary delete-link" onclick="removeConnection('${esc(link.id)}')">Remove connection</button>
+          </div>
+        </details>
       </article>`;
   }).join("") || '<p class="small-note">Some links refer to evidence that has been deleted. Remove those links or add the evidence again.</p>';
 }
