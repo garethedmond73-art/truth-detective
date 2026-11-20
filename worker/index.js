@@ -220,7 +220,8 @@ ${JSON.stringify(existingConnections)}`;
     const question = body && body.question;
     const isBoardReview = body && body.mode === "board-review";
     const isTruthTest = body && body.mode === "truth-test";
-    const isFastMode = isBoardReview || isTruthTest;
+    const isEvidenceTrail = body && body.mode === "evidence-trail";
+    const isFastMode = isBoardReview || isTruthTest || isEvidenceTrail;
     if (typeof question !== "string" || !question.trim() || question.length > 22000) {
       return json({ error: "Please enter a question of up to 22,000 characters." }, 400, allowedOrigin);
     }
@@ -240,10 +241,12 @@ ${JSON.stringify(existingConnections)}`;
             ? "This is a fast synthesis of existing user-provided research notes. Do not perform web searches or invent citations. Clearly identify what the notes support, what is uncertain, contradictions, and the most useful next question. Keep the answer concise and practical.\\n\\n" + question
             : isTruthTest
               ? "Perform a concise but rigorous evidence-quality audit. Use web search to check key claims and source independence. Do not invent citations, source relationships or prior confidence levels. Clearly disclose limits and uncertainty.\\n\\n" + question
-              : question,
-          max_output_tokens: isTruthTest ? 1800 : isBoardReview ? 2600 : 5000
+              : isEvidenceTrail
+                ? "Actively follow the user's selected evidence clue using web search. Trace original sources, search for independent support and serious counter-evidence, and propose three testable next leads. Distinguish direct findings from inference and speculation. Never assume the clue is true. Cite checkable sources and keep uncertainty visible.\\n\\n" + question
+                : question,
+          max_output_tokens: isEvidenceTrail ? 2800 : isTruthTest ? 1800 : isBoardReview ? 2600 : 5000
         }),
-        signal: AbortSignal.timeout(isTruthTest ? 90000 : isBoardReview ? 60000 : 90000)
+        signal: AbortSignal.timeout(isFastMode ? 90000 : 90000)
       });
 
       const raw = await upstream.text();
