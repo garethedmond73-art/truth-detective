@@ -85,17 +85,45 @@ function renderStarterQuestions() {
 }
 
 
+function readableEvidenceField(label, value) {
+  const raw = String(value || "");
+  if (!raw) return "Not recorded";
+  let html = "";
+  try {
+    const parsed = JSON.parse(raw);
+    const records = Array.isArray(parsed) ? parsed : [parsed];
+    if (records.length && records.every(record => record && typeof record === "object")) {
+      html = records.map((record,index) => {
+        const fields = Object.entries(record).map(([key,val]) =>
+          '<p><strong>' + esc(key.replace(/([A-Z])/g," $1").replace(/^./,c=>c.toUpperCase())) +
+          ':</strong> ' + esc(typeof val === "string" ? val : JSON.stringify(val)) + '</p>'
+        ).join("");
+        return '<section class="readable-json-record"><strong>Research record ' + (index+1) + '</strong>' + fields + '</section>';
+      }).join("");
+    }
+  } catch (_) {}
+  if (!html) {
+    html = esc(raw)
+      .replace(/&quot;([A-Za-z][A-Za-z0-9_]*)&quot;\s*:/g, '<strong>$1:</strong> ')
+      .replace(/\s*,\s*(?=&quot;[A-Za-z][A-Za-z0-9_]*&quot;\s*:)/g, '<br>');
+  }
+  if (raw.length > 260 || html.includes("readable-json-record")) {
+    return '<details class="evidence-long-field"><summary>Read ' + esc(label.toLowerCase()) + ' (' + raw.length + ' characters)</summary><div class="evidence-field-content">' + html + '</div></details>';
+  }
+  return html;
+}
+
 function draw() {
   $("items").innerHTML = items.map(item => `
     <article class="evidence-card">
       <b>${esc(item.claim)}</b>
       <p>${esc(item.kind)} · ${esc(item.status)}</p>
-      <p><strong>Source:</strong> ${esc(item.source) || "Not recorded"}</p>
-      ${item.pattern ? `<p><strong>Observed pattern:</strong> ${esc(item.pattern)}</p>` : ""}
-      ${item.meaning ? `<p><strong>Possible meaning:</strong> ${esc(item.meaning)}</p>` : ""}
-      ${item.alternative ? `<p><strong>Alternative explanation:</strong> ${esc(item.alternative)}</p>` : ""}
-      <p><strong>Supports:</strong> ${esc(item.support) || "Not recorded"}</p>
-      <p><strong>Challenges:</strong> ${esc(item.challenge) || "Not recorded"}</p>
+      <p><strong>Source:</strong> ${readableEvidenceField("Source",item.source)}</p>
+      ${item.pattern ? `<p><strong>Observed pattern:</strong> ${readableEvidenceField("Observed pattern",item.pattern)}</p>` : ""}
+      ${item.meaning ? `<p><strong>Possible meaning:</strong> ${readableEvidenceField("Possible meaning",item.meaning)}</p>` : ""}
+      ${item.alternative ? `<p><strong>Alternative explanation:</strong> ${readableEvidenceField("Alternative explanation",item.alternative)}</p>` : ""}
+      <p><strong>Supports:</strong> ${readableEvidenceField("Supporting evidence",item.support)}</p>
+      <p><strong>Challenges:</strong> ${readableEvidenceField("Challenges",item.challenge)}</p>
       <button class="secondary" onclick="removeItem('${esc(item.id)}')">Delete evidence</button>
     </article>
   `).join("");
