@@ -56,3 +56,9 @@
 .evidence-field-content p{margin:7px 0}
 .readable-json-record{padding:10px;margin:8px 0;background:#1b2a33;border-radius:8px}
 .readable-json-record>strong{color:#e0b66f}
+
+
+/* Review controls for AI-discovered links */
+.discovery-review-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.discovery-review-actions button{flex:1 1 150px;margin:0;min-height:44px}
+@media(max-width:520px){.discovery-review-actions{display:grid;grid-template-columns:1fr}}
