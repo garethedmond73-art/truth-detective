@@ -236,7 +236,7 @@ ${JSON.stringify(existingConnections)}`;
           instructions: SYSTEM_PROMPT,
           ...(isBoardReview ? {} : { tools: [{ type: "web_search", search_context_size: "medium" }] }),
           input: isBoardReview
-            ? "This is a fast synthesis of existing user-provided research notes. Do not perform web searches or invent citations. Clearly identify what the notes support, what is uncertain, contradictions, and the most useful next question. Keep the answer concise and practical.\\n\\n" + question
+            ? "This is a fast synthesis of existing user-provided research notes. Do not perform web searches or invent citations. Clearly identify what the notes support, what is uncertain, contradictions, and the most useful next question. Keep the answer concise and practical.\n\n" + question
             : question,
           max_output_tokens: isBoardReview ? 2600 : 5000
         }),
