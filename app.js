@@ -118,6 +118,7 @@ function investigationDisplayTitle(record) {
   if (type === "Big picture review") return "Whole-board big picture";
   if (type === "Whole-board theory comparison") return "Compare all theories";
   if (type === "Missing-link analysis") return "Find missing links";
+  if (type === "Truth test") return "Truth Testing Engine review";
   return String(record?.question || "Investigation").slice(0,180);
 }
 
@@ -334,7 +335,7 @@ function renderSafeMarkdown(markdown) {
     });
     return out;
   };
-  const lines = String(markdown || "").replace(/\r/g, "").split("\n");
+  const lines = String(markdown || "").replace(/\r/g, "").replace(/"\\s*target="_blank"\\s*rel="noopener noreferrer">[^)\\n]*/g, "").split("\n");
   const blocks = [];
   let paragraph = [], list = [], listType = "";
   const flushParagraph = () => {
