@@ -272,6 +272,59 @@ function renderInvestigationArchive() {
       <button class="secondary" onclick="addInvestigationToLedger('${esc(record.id)}')" disabled>Automatically added</button>
     </article>`).join("");
 }
+function renderSafeMarkdown(markdown) {
+  const inline = value => {
+    let out = esc(value);
+    out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match,label,url) =>
+      '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
+    out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    out = out.replace(/\*(.+?)\*/g, "<em>$1</em>");
+    out = out.replace(/\`([^\`]+)\`/g, "<code>$1</code>");
+    out = out.replace(/(https?:\/\/[^\s<]+)/g, url => {
+      const clean = url.replace(/[.,;!?]+$/, "");
+      const tail = url.slice(clean.length);
+      return '<a href="' + esc(clean) + '" target="_blank" rel="noopener noreferrer">' + esc(clean) + '</a>' + tail;
+    });
+    return out;
+  };
+  const lines = String(markdown || "").replace(/\r/g, "").split("\n");
+  const blocks = [];
+  let paragraph = [], list = [], listType = "";
+  const flushParagraph = () => {
+    if (paragraph.length) { blocks.push("<p>" + paragraph.map(inline).join(" ") + "</p>"); paragraph=[]; }
+  };
+  const flushList = () => {
+    if (list.length) {
+      const tag = listType === "ol" ? "ol" : "ul";
+      blocks.push("<" + tag + ">" + list.map(item => "<li>" + inline(item) + "</li>").join("") + "</" + tag + ">");
+      list=[]; listType="";
+    }
+  };
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) { flushParagraph(); flushList(); continue; }
+    const heading = /^(#{1,3})\s+(.+)$/.exec(line);
+    const bullet = /^[-*•]\s+(.+)$/.exec(line);
+    const numbered = /^\d+[.)]\s+(.+)$/.exec(line);
+    if (heading) {
+      flushParagraph(); flushList();
+      const level = Math.min(4, heading[1].length + 1);
+      blocks.push("<h" + level + ">" + inline(heading[2]) + "</h" + level + ">");
+    } else if (bullet || numbered) {
+      flushParagraph();
+      const nextType = numbered ? "ol" : "ul";
+      if (listType && listType !== nextType) flushList();
+      listType = nextType;
+      list.push((bullet || numbered)[1]);
+    } else {
+      flushList();
+      paragraph.push(line);
+    }
+  }
+  flushParagraph(); flushList();
+  return blocks.join("");
+}
+
 function showInvestigation(record, showActions = true) {
   const answerBox = $("detectiveAnswer");
   answerBox.replaceChildren();
@@ -281,7 +334,7 @@ function showInvestigation(record, showActions = true) {
   const scorecardText = scorecardMatch ? record.answer.slice(scorecardMatch.index + scorecardMatch[0].length).trim() : "";
   const answerText = document.createElement("div");
   answerText.className = "detective-answer-text";
-  answerText.textContent = mainAnswer;
+  answerText.innerHTML = renderSafeMarkdown(mainAnswer);
   answerBox.appendChild(answerText);
   const scorecard = document.createElement("section");
   scorecard.className = "truth-scorecard";
@@ -290,7 +343,7 @@ function showInvestigation(record, showActions = true) {
   scorecard.appendChild(scoreTitle);
   const scoreBody = document.createElement("p");
   scoreBody.className = "detective-answer-text";
-  scoreBody.textContent = scorecardText || "Not provided for this investigation. Run a new investigation to request an evidence assessment.";
+  scoreBody.innerHTML = renderSafeMarkdown(scorecardText || "Not provided for this investigation. Run a new investigation to request an evidence assessment.");
   scorecard.appendChild(scoreBody);
   const caution = document.createElement("p");
   caution.className = "small-note";
