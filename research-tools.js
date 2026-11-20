@@ -11,20 +11,20 @@
   const compact = (value, max=1100) => String(value || "").slice(0,max);
 
   function boardContext() {
-    const evidence = items.slice(0,36).map((item,index) => ({
-      id:item.id || "item-"+index, claim:compact(item.claim,350), perspective:compact(item.kind,80),
-      assessment:compact(item.status,80), source:compact(item.source,350),
-      observedPattern:compact(item.pattern,350), possibleMeaning:compact(item.meaning,350),
-      alternative:compact(item.alternative,350), support:compact(item.support,350), challenge:compact(item.challenge,350)
+    const evidence = items.slice(-8).map((item,index) => ({
+      id:item.id || "item-"+index, claim:compact(item.claim,220), perspective:compact(item.kind,50),
+      assessment:compact(item.status,60), source:compact(item.source,180),
+      observedPattern:compact(item.pattern,180), possibleMeaning:compact(item.meaning,180),
+      alternative:compact(item.alternative,180), support:compact(item.support,180), challenge:compact(item.challenge,180)
     }));
-    const links = connections.slice(0,100).map(link => ({
-      from:link.from,to:link.to,description:compact(link.text,240),
-      reason:compact(link.reason,260),strength:compact(link.strength,40),
+    const links = connections.slice(-14).map(link => ({
+      from:link.from,to:link.to,description:compact(link.text,140),
+      reason:compact(link.reason,140),strength:compact(link.strength,40),
       automatic:link.origin === "ai-discovery"
     }));
-    const history = investigations.slice(-12).map(record => ({
+    const history = investigations.slice(-4).map(record => ({
       question:compact(record.question,280),type:compact(record.type,60),
-      conclusion:compact(record.answer,1800),date:record.createdAt
+      conclusion:compact(record.answer,900),date:record.createdAt
     }));
     return {evidence,links,history};
   }
