@@ -65,3 +65,25 @@
 
 
 .truth-test-panel{margin:18px 0;padding:15px;background:#101820;border:1px solid #e0b66f;border-radius:11px}.truth-test-panel h3{margin-top:0;color:#e0b66f}.truth-test-panel button{min-height:46px}.truth-test-panel p{overflow-wrap:anywhere}
+
+/* Compact, tap-to-expand evidence and connection cards */
+.evidence-card-heading>b{display:block;font-size:1.02rem;line-height:1.4;overflow-wrap:anywhere}
+.evidence-meta{margin:7px 0 0;color:#b9c6cc;font-size:.9rem}
+.evidence-details,.connection-details{margin-top:12px;border-top:1px solid #52636c;padding-top:10px}
+.evidence-details>summary,.connection-details>summary{cursor:pointer;color:#e0b66f;font-weight:700;padding:7px 0;min-height:40px}
+.evidence-details-content,.connection-details-content{padding-top:8px;overflow-wrap:anywhere}
+.evidence-details-content p,.connection-details-content p{line-height:1.55}
+.connection-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.connection-short-title{display:flex;flex-direction:column;gap:6px;min-width:0;font-weight:700;line-height:1.4;overflow-wrap:anywhere}
+.connection-arrow{color:#e0b66f;font-size:1.15rem;line-height:1}
+.connection-card-heading .strength{flex:0 0 auto}
+.connection-details .connection-nodes{margin-top:6px}
+@media(max-width:520px){
+ .evidence-card,.connection-card{padding:12px}
+ .evidence-card-heading>b{font-size:1rem}
+ .evidence-details>summary,.connection-details>summary{font-size:.95rem}
+ .connection-card-heading{display:block}
+ .connection-card-heading>.strength{display:inline-block;margin-top:8px}
+ .connection-short-title{font-size:.96rem}
+ .evidence-details-content button,.connection-details-content button{width:100%}
+}
