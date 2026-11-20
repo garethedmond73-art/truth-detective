@@ -1,4 +1,4 @@
-const CACHE_NAME = "truth-detective-v23";
+const CACHE_NAME = "truth-detective-v24";
 const APP_FILES = ["./", "./index.html", "./style.css", "./app.js", "./enhancements.js", "./research-tools.js", "./worker/index.js", "./manifest.webmanifest", "./icon.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
