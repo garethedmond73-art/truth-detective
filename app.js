@@ -335,7 +335,7 @@ function renderSafeMarkdown(markdown) {
     });
     return out;
   };
-  const lines = String(markdown || "").replace(/\r/g, "").replace(/"\\s*target="_blank"\\s*rel="noopener noreferrer">[^)\\n]*/g, "").split("\n");
+  const lines = String(markdown || "").replace(/\r/g, "").replace(/"\s*target="_blank"\s*rel="noopener noreferrer">[^)\n]*/g, "").split("\n");
   const blocks = [];
   let paragraph = [], list = [], listType = "";
   const flushParagraph = () => {
