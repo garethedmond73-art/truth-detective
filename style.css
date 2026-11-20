@@ -27,3 +27,13 @@
 
 /* Automatic discovery and accessible map navigation */
 .map-tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.map-tools button{min-width:48px}.auto-discovery-panel{margin:14px 0;padding:14px;background:#1b2a33;border:1px solid #52636c;border-radius:10px}.auto-discovery-panel h4{color:#e0b66f;margin:0 0 6px}.auto-discovery-status{color:#e0b66f;font-weight:600}.auto-discovery-card{padding:12px;margin:10px 0;background:#21343c;border:1px solid #52636c;border-radius:9px}.auto-discovery-card strong{display:block;margin-bottom:6px}.auto-discovery-card a{color:#e0b66f;overflow-wrap:anywhere}.auto-discovery-tag{display:inline-block;margin:4px 6px 4px 0;padding:3px 8px;border-radius:20px;background:#354750;color:#edf3f5;font-size:.78rem}.network-canvas-wrap{overflow:auto;max-height:75vh;touch-action:pan-x pan-y}.network-canvas-wrap svg{width:100%;min-width:0;transform-origin:top left}.network-topic-label{font-size:12px}.network-node circle{stroke-width:2.5}.network-edge{stroke-width:2;opacity:.7}@media(max-width:520px){.map-tools button{flex:1}.auto-discovery-panel{padding:11px}.network-canvas-wrap{max-height:65vh}}
+
+/* Whole-board research, theory comparison and portable backups */
+.research-tools-panel{margin:26px 0;padding:18px;background:#1b2a33;border:1px solid #e0b66f;border-radius:14px}
+.research-tools-panel h2,.research-tools-panel h3{color:#e0b66f}
+.research-tool-actions{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+.research-tool-actions button{margin:0;flex:1 1 170px}
+.backup-panel{margin-top:18px;padding:14px;background:#101820;border:1px solid #52636c;border-radius:10px}
+.backup-panel h3{margin-top:0}
+.research-tools-panel button:disabled{opacity:.6;cursor:wait}
+@media(max-width:520px){.research-tools-panel{padding:13px}.research-tool-actions{display:grid;grid-template-columns:1fr}.research-tool-actions button{width:100%}}
