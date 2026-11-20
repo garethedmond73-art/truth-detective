@@ -12,19 +12,19 @@
 
   function boardContext() {
     const evidence = items.slice(-14).map((item,index) => ({
-      id:item.id || "item-"+index, claim:compact(item.claim,220), perspective:compact(item.kind,50),
-      assessment:compact(item.status,60), source:compact(item.source,100),
-      observedPattern:compact(item.pattern,100), possibleMeaning:compact(item.meaning,100),
-      alternative:compact(item.alternative,100), support:compact(item.support,100), challenge:compact(item.challenge,100)
+      id:item.id || "item-"+index, claim:compact(item.claim,160), perspective:compact(item.kind,40),
+      assessment:compact(item.status,50), source:compact(item.source,60),
+      observedPattern:compact(item.pattern,60), possibleMeaning:compact(item.meaning,60),
+      alternative:compact(item.alternative,60), support:compact(item.support,60), challenge:compact(item.challenge,60)
     }));
     const links = connections.slice(-10).map(link => ({
-      from:link.from,to:link.to,description:compact(link.text,120),
-      reason:compact(link.reason,120),strength:compact(link.strength,40),
+      from:link.from,to:link.to,description:compact(link.text,100),
+      reason:compact(link.reason,100),strength:compact(link.strength,30),
       automatic:link.origin === "ai-discovery"
     }));
     const history = investigations.slice(-3).map(record => ({
-      question:compact(record.question,280),type:compact(record.type,60),
-      conclusion:compact(record.answer,700),date:record.createdAt
+      question:compact(record.question,220),type:compact(record.type,50),
+      conclusion:compact(record.answer,500),date:record.createdAt
     }));
     return {evidence,links,history};
   }
