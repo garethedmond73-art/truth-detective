@@ -22,12 +22,23 @@
 <section><h3>Human experience</h3><p>Personal accounts, dreams, history and lived experience.</p></section>
 <section class="pattern-card"><h3>Symbols &amp; language patterns</h3><p>Symbols, metaphors, number patterns, word roots, translation differences, repeated phrases, geometry and motifs across traditions.</p><p><strong>Our rule:</strong> record what we observe separately from what we think it means, then test alternative explanations.</p></section>
 </div>
+
+<section class="intro-panel">
+<h2>Connections map</h2>
+<p>Bring two pieces of evidence together and record the relationship you think may exist. The detective will show the link, but it will never assume that a connection proves a theory.</p>
+<div class="map-key"><span class="key-dot"></span> Evidence item <span class="key-line"></span> Proposed connection</div>
+<button id="addConnection">＋ Add a connection</button>
+<div id="connections" aria-live="polite"></div>
+</section>
+
 <h2>Evidence ledger</h2>
 <p>Record claims, sources, what supports them and what challenges them. Keep conclusions provisional.</p>
 <button id="add">Add evidence</button>
 <div id="items"></div>
 </main>
+
 <dialog id="dlg"><form method="dialog">
+<h2>Add evidence</h2>
 <label>Claim<textarea id="claim" required></textarea></label>
 <label>Perspective<select id="kind"><option>Scripture</option><option>Science</option><option>Philosophy</option><option>Human experience</option><option>History</option><option>Symbols &amp; language patterns</option></select></label>
 <label>Assessment<select id="status"><option>Unknown</option><option>Plausible</option><option>Supported</option><option>Disputed</option></select></label>
@@ -37,8 +48,20 @@
 <label>Alternative explanation<textarea id="alternative" placeholder="Could coincidence, translation, context or selection explain it?"></textarea></label>
 <label>What supports it?<textarea id="support"></textarea></label>
 <label>What challenges it?<textarea id="challenge"></textarea></label>
-<button id="save">Save evidence</button><button value="cancel">Cancel</button>
+<div class="dialog-actions"><button id="save">Save evidence</button><button value="cancel" class="secondary">Cancel</button></div>
 </form></dialog>
+
+<dialog id="connectionDlg"><form method="dialog">
+<h2>Connect two pieces of evidence</h2>
+<p class="small-note">Choose the two records. Explain the possible relationship in your own words.</p>
+<label>First evidence item<select id="fromEvidence" required></select></label>
+<label>Second evidence item<select id="toEvidence" required></select></label>
+<label>What is the possible connection?<textarea id="connectionText" required placeholder="Describe the shared idea, symbol, pattern or question."></textarea></label>
+<label>Why might this link matter?<textarea id="connectionReason" placeholder="What supports the link? What should we investigate next?"></textarea></label>
+<label>Confidence<select id="connectionStrength"><option value="Tentative">Tentative — worth investigating</option><option value="Moderate">Moderate — some supporting evidence</option><option value="Strong">Strong — well supported</option><option value="Disputed">Disputed — evidence points both ways</option></select></label>
+<div class="dialog-actions"><button id="saveConnection">Save connection</button><button value="cancel" class="secondary">Cancel</button></div>
+</form></dialog>
+
 <script src="./app.js"></script>
 <script>
 if ("serviceWorker" in navigator) {
