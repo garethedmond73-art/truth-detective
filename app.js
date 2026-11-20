@@ -254,10 +254,28 @@ function renderInvestigationArchive() {
 function showInvestigation(record, showActions = true) {
   const answerBox = $("detectiveAnswer");
   answerBox.replaceChildren();
+  const scorecardMarker = /(?:^|\\n)EVIDENCE SCORECARD\\s*\\n/i;
+  const scorecardMatch = scorecardMarker.exec(record.answer || "");
+  const mainAnswer = scorecardMatch ? record.answer.slice(0, scorecardMatch.index).trim() : (record.answer || "");
+  const scorecardText = scorecardMatch ? record.answer.slice(scorecardMatch.index + scorecardMatch[0].length).trim() : "";
   const answerText = document.createElement("div");
   answerText.className = "detective-answer-text";
-  answerText.textContent = record.answer;
+  answerText.textContent = mainAnswer;
   answerBox.appendChild(answerText);
+  const scorecard = document.createElement("section");
+  scorecard.className = "truth-scorecard";
+  const scoreTitle = document.createElement("h3");
+  scoreTitle.textContent = "Evidence scorecard";
+  scorecard.appendChild(scoreTitle);
+  const scoreBody = document.createElement("p");
+  scoreBody.className = "detective-answer-text";
+  scoreBody.textContent = scorecardText || "Not provided for this investigation. Run a new investigation to request an evidence assessment.";
+  scorecard.appendChild(scoreBody);
+  const caution = document.createElement("p");
+  caution.className = "small-note";
+  caution.textContent = "This is a reasoned assessment, not a numerical truth score. Check the sources yourself; missing citations or counter-evidence should lower confidence.";
+  scorecard.appendChild(caution);
+  answerBox.appendChild(scorecard);
   renderCitations(answerBox, record.citations);
   if (showActions) {
     const savedNote = document.createElement("p");
