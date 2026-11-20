@@ -113,10 +113,18 @@ function readableEvidenceField(label, value) {
   return html;
 }
 
+function investigationDisplayTitle(record) {
+  const type = String(record?.type || "");
+  if (type === "Big picture review") return "Whole-board big picture";
+  if (type === "Whole-board theory comparison") return "Compare all theories";
+  if (type === "Missing-link analysis") return "Find missing links";
+  return String(record?.question || "Investigation").slice(0,180);
+}
+
 function draw() {
   $("items").innerHTML = items.map(item => `
     <article class="evidence-card">
-      <b>${esc(item.claim)}</b>
+      <b>${esc(item.investigationId ? investigationDisplayTitle(investigations.find(record => record.id === item.investigationId)) : item.claim)}</b>
       <p>${esc(item.kind)} · ${esc(item.status)}</p>
       <p><strong>Source:</strong> ${readableEvidenceField("Source",item.source)}</p>
       ${item.pattern ? `<p><strong>Observed pattern:</strong> ${readableEvidenceField("Observed pattern",item.pattern)}</p>` : ""}
@@ -300,7 +308,7 @@ function renderInvestigationArchive() {
         esc(source.title || source.url) + '</a></li>').join("");
     return `
       <article class="archive-card">
-        <strong>${esc(record.question)}</strong>
+        <strong>${esc(investigationDisplayTitle(record))}</strong>
         <p class="archive-meta">${esc(new Date(record.createdAt).toLocaleString())} · ${esc(record.type || "Investigation")}</p>
         <details class="archive-full-answer">
           <summary>Read the full investigation</summary>
