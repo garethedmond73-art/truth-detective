@@ -440,7 +440,7 @@ function addInvestigationToLedger(id) {
 }
 window.addInvestigationToLedger = addInvestigationToLedger;
 
-async function requestInvestigation(question, type = "Investigation") {
+async function requestInvestigation(question, type = "Investigation", options = {}) {
   const answerBox = $("detectiveAnswer");
   const askButton = $("askButton");
   askButton.disabled = true;
@@ -452,7 +452,7 @@ async function requestInvestigation(question, type = "Investigation") {
     const response = await fetch(DETECTIVE_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question })
+      body: JSON.stringify({ question, mode: options.fastReview ? "board-review" : "standard" })
     });
     let data;
     try { data = await response.json(); }
