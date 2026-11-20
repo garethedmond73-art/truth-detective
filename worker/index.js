@@ -29,9 +29,9 @@ Never give a percentage or imply this is an objective truth score. Do not award 
 Be respectful of beliefs without simply agreeing with the user. Conclusions are provisional.
 `;
 
-const ALLOWED_ORIGINS = new Set([
-  "https://garethedmond73-art.github.io"
-]);
+// Public static GitHub Pages client; endpoints use no browser credentials.
+// Wildcard CORS avoids brittle origin mismatches across Pages preview/custom domains.
+const ALLOWED_ORIGINS = new Set(["https://garethedmond73-art.github.io"]);
 
 function json(data, status = 200, origin = "*") {
   return new Response(JSON.stringify(data), {
@@ -75,10 +75,10 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const origin = request.headers.get("Origin") || "";
-    const allowedOrigin = ALLOWED_ORIGINS.has(origin) ? origin : "";
+    const allowedOrigin = origin && ALLOWED_ORIGINS.has(origin) ? origin : "*";
 
     if (request.method === "OPTIONS") {
-      if (!allowedOrigin) return new Response(null, { status: 403 });
+      // Preflight is public and credential-free; return a usable CORS response.
       return new Response(null, {
         status: 204,
         headers: {
@@ -104,9 +104,7 @@ export default {
       return json({ error: "Not found. Use GET /health, POST /ask or POST /discover." }, 404);
     }
 
-    if (!allowedOrigin) {
-      return json({ error: "This website is not allowed to use the detective service." }, 403);
-    }
+    // The API is intentionally public for the static app; never expose the API key to the client.
 
     if (!env.OPENAI_API_KEY) {
       return json({
