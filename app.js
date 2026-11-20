@@ -327,6 +327,7 @@ function renderInvestigationArchive() {
   }
   host.innerHTML = investigations.slice().reverse().map(record => {
     const answer = renderSafeMarkdown(record.answer || "");
+    const preview = String(record.answer || "").replace(/^#{1,4}\\s*/gm, "").replace(/[*_`>#|]/g, "").replace(/\\s+/g, " ").trim().slice(0, 240);
     const sources = (Array.isArray(record.citations) ? record.citations : [])
       .filter(source => source && /^https?:\/\//i.test(source.url || ""))
       .map(source => '<li><a href="' + esc(source.url) + '" target="_blank" rel="noopener noreferrer">' +
@@ -335,6 +336,8 @@ function renderInvestigationArchive() {
       <article class="archive-card">
         <strong>${esc(investigationDisplayTitle(record))}</strong>
         <p class="archive-meta">${esc(new Date(record.createdAt).toLocaleString())} · ${esc(record.type || "Investigation")}</p>
+        <p class="archive-preview">${esc(preview)}${preview.length >= 240 ? "…" : ""}</p>
+        <p class="archive-source-count">${(record.citations || []).length} cited source${(record.citations || []).length === 1 ? "" : "s"} · AI research awaiting human review</p>
         ${record.trailFrom ? '<p class="archive-meta">Following clue: ' + esc(record.trailFrom.claim) + '</p>' : ''}
         <details class="archive-full-answer">
           <summary>Read the full investigation</summary>
