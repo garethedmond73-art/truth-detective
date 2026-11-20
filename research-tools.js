@@ -89,7 +89,7 @@
   ));
 
   function makeBackup() {
-    const keys=["td-items","td-connections","td-investigations","td-starter-map-v1","td-auto-discovery-dismissed","td-auto-discovery-hash"];
+    const keys=["td-items","td-connections","td-investigations","td-starter-map-v1","td-auto-discovery-dismissed","td-auto-discovery-hash","td-auto-discovery-pending"];
     const local={};
     keys.forEach(key=>{const value=localStorage.getItem(key);if(value!==null)local[key]=value;});
     return {format:"truth-detective-backup",version:1,exportedAt:new Date().toISOString(),
@@ -128,7 +128,7 @@
       saveAll();
       localStorage.setItem("td-investigations",JSON.stringify(investigations));
       const settings=data.localSettings||{};
-      ["td-starter-map-v1","td-auto-discovery-dismissed","td-auto-discovery-hash"].forEach(key=>{
+      ["td-starter-map-v1","td-auto-discovery-dismissed","td-auto-discovery-hash","td-auto-discovery-pending"].forEach(key=>{
         if(Object.prototype.hasOwnProperty.call(settings,key))localStorage.setItem(key,settings[key]);
         else localStorage.removeItem(key);
       });
