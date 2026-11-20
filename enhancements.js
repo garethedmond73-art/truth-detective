@@ -1,6 +1,12 @@
 /* Truth Detective usability + automatic connection discovery */
 (() => {
   "use strict";
+  // Wait until the core app script has finished initialising its shared state.
+  window.addEventListener("load", function initialiseEnhancements() {
+  if (typeof saveAll !== "function" || typeof items === "undefined" || typeof connections === "undefined") {
+    console.error("Truth Detective enhancements paused: core app did not initialise.");
+    return;
+  }
   const $ = id => document.getElementById(id);
   const originalSaveAll = saveAll;
   const dismissedPairs = new Set(JSON.parse(localStorage.getItem("td-auto-discovery-dismissed") || "[]"));
@@ -192,4 +198,5 @@
   renderDiscoveryResults([]);
   setStatus("Checking your saved evidence for possible connections…");
   scheduleDiscovery(1200);
+  });
 })();
