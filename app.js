@@ -452,7 +452,7 @@ async function requestInvestigation(question, type = "Investigation", options = 
     const response = await fetch(DETECTIVE_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, mode: options.fastReview ? "board-review" : "standard" })
+      body: JSON.stringify({ question, mode: options.mode || (options.fastReview ? "board-review" : "standard") })
     });
     let data;
     try { data = await response.json(); }
