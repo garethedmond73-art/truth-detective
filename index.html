@@ -31,6 +31,18 @@
 <div id="connections" aria-live="polite"></div>
 </section>
 
+<section class="detective-panel" aria-labelledby="askHeading">
+<h2 id="askHeading">Ask the detective</h2>
+<p>Put a big question under investigation. The AI can compare scripture, science, philosophy, history and human experience, and search for current sources. Treat its conclusions as provisional and check the evidence.</p>
+<form id="askForm">
+<label for="detectiveQuestion">What should we investigate?
+<textarea id="detectiveQuestion" maxlength="10000" required placeholder="For example: What do different traditions and modern science suggest about consciousness?"></textarea>
+</label>
+<div class="dialog-actions"><button id="askButton" type="submit">Investigate</button></div>
+</form>
+<div id="detectiveAnswer" class="detective-answer" aria-live="polite"></div>
+</section>
+
 <h2>Evidence ledger</h2>
 <p>Record claims, sources, what supports them and what challenges them. Keep conclusions provisional.</p>
 <button id="add">Add evidence</button>
