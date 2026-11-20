@@ -151,7 +151,7 @@ function renderInvestigationArchive() {
       <strong>${esc(record.question)}</strong>
       <p class="archive-meta">${esc(new Date(record.createdAt).toLocaleString())} · ${esc(record.type || "Investigation")}</p>
       <p class="archive-preview">${esc(record.answer.slice(0, 420))}${record.answer.length > 420 ? "…" : ""}</p>
-      <button class="secondary" onclick="addInvestigationToLedger('${esc(record.id)}')">Add to evidence ledger</button>
+      <button class="secondary" onclick="addInvestigationToLedger('${esc(record.id)}')" disabled>Automatically added</button>
     </article>`).join("");
 }
 function showInvestigation(record, showActions = true) {
