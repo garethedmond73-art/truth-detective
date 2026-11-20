@@ -1,3 +1,13 @@
 name = "truth-detective-ai"
 main = "worker/index.js"
 compatibility_date = "2026-11-20"
+
+# Approximate per-IP protection for the public anonymous app.
+# Investigations consume 3 units; automatic discovery consumes 1.
+[[ratelimits]]
+name = "TD_RATE_LIMITER"
+namespace_id = "8142037"
+
+[ratelimits.simple]
+limit = 12
+period = 60
