@@ -3,6 +3,7 @@
   "use strict";
   const $ = id => document.getElementById(id);
   const originalSaveAll = saveAll;
+  const dismissedPairs = new Set(JSON.parse(localStorage.getItem("td-auto-discovery-dismissed") || "[]"));
   let discoveryTimer = null;
   let discoveryBusy = false;
   let graphZoom = 1;
@@ -36,7 +37,7 @@
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({
           evidence: items.slice(0,36),
-          existingConnections: connections.map(link => ({from:link.from,to:link.to}))
+          existingConnections: connections.map(link => ({from:link.from,to:link.to})).concat(Array.from(dismissedPairs).map(key => {const parts=key.split("::");return {from:parts[0],to:parts[1]};}))
         })
       });
       const data = await response.json();
@@ -99,6 +100,16 @@
   saveAll = function() {
     originalSaveAll();
     if ($("autoDiscoveryStatus")) scheduleDiscovery();
+  };
+
+  const originalRemoveConnection = window.removeConnection;
+  window.removeConnection = function(id) {
+    const link = connections.find(item => item.id === id);
+    if (link) {
+      dismissedPairs.add(pairKey(link.from,link.to));
+      localStorage.setItem("td-auto-discovery-dismissed", JSON.stringify(Array.from(dismissedPairs)));
+    }
+    originalRemoveConnection(id);
   };
 
   // A spaced two-column layout with generous vertical room prevents long labels colliding.
