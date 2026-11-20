@@ -101,7 +101,7 @@ export default {
 
     const isDiscover = url.pathname === "/discover" && request.method === "POST";
     if (!isDiscover && (url.pathname !== "/ask" || request.method !== "POST")) {
-      return json({ error: "Not found. Use GET /health or POST /ask." }, 404);
+      return json({ error: "Not found. Use GET /health, POST /ask or POST /discover." }, 404);
     }
 
     if (!allowedOrigin) {
