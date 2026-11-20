@@ -105,6 +105,30 @@
 <div class="dialog-actions"><button id="saveConnection">Save connection</button><button value="cancel" class="secondary">Cancel</button></div>
 </form></dialog>
 
+<script>
+(function () {
+  function showAppError(message) {
+    let panel = document.getElementById("appRuntimeError");
+    if (!panel) {
+      panel = document.createElement("div");
+      panel.id = "appRuntimeError";
+      panel.setAttribute("role", "alert");
+      panel.style.cssText = "margin:12px;padding:14px;background:#542d2d;color:#fff;border:2px solid #ffb4a9;border-radius:10px;font:16px/1.5 system-ui;overflow-wrap:anywhere";
+      panel.innerHTML = "<strong>App problem detected</strong><p id='appRuntimeErrorText'></p><p>Please send Gaz this message.</p>";
+      document.body.insertBefore(panel, document.body.firstChild);
+    }
+    const text = document.getElementById("appRuntimeErrorText");
+    if (text) text.textContent = String(message || "Unknown app error").slice(0,900);
+  }
+  window.addEventListener("error", function (event) {
+    showAppError((event.message || "Script failed") + (event.filename ? " · " + event.filename.split("/").pop() : "") + (event.lineno ? " · line " + event.lineno : ""));
+  });
+  window.addEventListener("unhandledrejection", function (event) {
+    const reason = event.reason;
+    showAppError("Background task: " + (reason && reason.message ? reason.message : String(reason)));
+  });
+})();
+</script>
 <script src="./app.js"></script>
 <script src="./enhancements.js"></script>
 <script src="./research-tools.js"></script>
