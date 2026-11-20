@@ -62,3 +62,6 @@
 .discovery-review-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .discovery-review-actions button{flex:1 1 150px;margin:0;min-height:44px}
 @media(max-width:520px){.discovery-review-actions{display:grid;grid-template-columns:1fr}}
+
+
+.truth-test-panel{margin:18px 0;padding:15px;background:#101820;border:1px solid #e0b66f;border-radius:11px}.truth-test-panel h3{margin-top:0;color:#e0b66f}.truth-test-panel button{min-height:46px}.truth-test-panel p{overflow-wrap:anywhere}
