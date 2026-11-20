@@ -163,27 +163,18 @@ function showInvestigation(record, showActions = true) {
   answerBox.appendChild(answerText);
   renderCitations(answerBox, record.citations);
   if (showActions) {
+    const savedNote = document.createElement("p");
+    savedNote.className = "auto-added-note";
+    savedNote.textContent = "Automatically saved to your investigation archive and evidence ledger.";
+    answerBox.appendChild(savedNote);
     const actions = document.createElement("div");
     actions.className = "investigation-actions";
-    const saveButton = document.createElement("button");
-    saveButton.type = "button";
-    saveButton.textContent = "Save investigation";
-    saveButton.onclick = () => {
-      if (investigations.some(item => item.id === record.id)) {
-        saveButton.textContent = "Already saved";
-        return;
-      }
-      investigations.push(record);
-      saveInvestigations();
-      renderInvestigationArchive();
-      saveButton.textContent = "Saved to archive";
-    };
     const compareButton = document.createElement("button");
     compareButton.type = "button";
     compareButton.className = "secondary";
     compareButton.textContent = "Compare explanations";
     compareButton.onclick = () => compareExplanations(record);
-    actions.append(saveButton, compareButton);
+    actions.append(compareButton);
     answerBox.appendChild(actions);
   }
 }
@@ -241,6 +232,28 @@ async function requestInvestigation(question, type = "Investigation") {
       type
     };
     latestInvestigation = record;
+    // Automatically archive every successful investigation and comparison.
+    investigations.push(record);
+    saveInvestigations();
+    const sourceList = record.citations.map(source =>
+      (source.title || source.url) + " — " + source.url
+    ).join("\n");
+    items.push({
+      id: "e-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
+      investigationId: record.id,
+      claim: (type === "Comparison" ? "Comparison: " : "Investigation: ") + question.slice(0, 220),
+      kind: type === "Comparison" ? "AI theory comparison" : "AI investigation",
+      status: "Needs review",
+      source: sourceList || "No web citations returned — AI synthesis only",
+      pattern: "",
+      meaning: "",
+      alternative: "",
+      support: record.answer,
+      challenge: "Automatically captured AI output, not independently verified evidence. Check each cited source and add counter-evidence before treating any claim as established."
+    });
+    saveAll();
+    draw();
+    renderInvestigationArchive();
     showInvestigation(record);
     return record;
   } catch (error) {
