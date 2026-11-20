@@ -10,6 +10,7 @@
   const $ = id => document.getElementById(id);
   const originalSaveAll = saveAll;
   const dismissedPairs = new Set(JSON.parse(localStorage.getItem("td-auto-discovery-dismissed") || "[]"));
+  let pendingSuggestions = JSON.parse(localStorage.getItem("td-auto-discovery-pending") || "[]");
   let discoveryTimer = null;
   let discoveryBusy = false;
   let graphZoom = 1;
@@ -38,44 +39,40 @@
     discoveryBusy = true;
     setStatus("Searching your evidence for new connections…");
     try {
+      const excluded = connections.map(link => ({from:link.from,to:link.to}))
+        .concat(pendingSuggestions.map(link => ({from:link.from,to:link.to})))
+        .concat(Array.from(dismissedPairs).map(key => {const parts=key.split("::");return {from:parts[0],to:parts[1]};}));
       const response = await fetch("https://truth-detective-ai.garethedmond73.workers.dev/discover", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-          evidence: items.slice(0,36),
-          existingConnections: connections.map(link => ({from:link.from,to:link.to})).concat(Array.from(dismissedPairs).map(key => {const parts=key.split("::");return {from:parts[0],to:parts[1]};}))
-        })
+        body: JSON.stringify({ evidence: items.slice(-36), existingConnections: excluded })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Discovery could not be completed.");
-      const known = new Set(connections.map(link => pairKey(link.from,link.to)));
-      const added = [];
+      const known = new Set(excluded.map(link => pairKey(link.from,link.to)));
+      const found = [];
       (Array.isArray(data.connections) ? data.connections : []).forEach((suggestion,index) => {
         const key = pairKey(suggestion.from,suggestion.to);
         if (known.has(key) || !evidenceById(suggestion.from) || !evidenceById(suggestion.to)) return;
         known.add(key);
-        const link = {
+        found.push({
           id: "ai-link-" + Date.now() + "-" + index + "-" + Math.random().toString(36).slice(2,7),
-          from: suggestion.from,
-          to: suggestion.to,
-          text: suggestion.text,
-          reason: suggestion.reason,
+          from: suggestion.from, to: suggestion.to,
+          text: suggestion.text, reason: suggestion.reason,
           strength: suggestion.strength === "Moderate" ? "Moderate" : "Tentative",
           evidenceBasis: suggestion.evidenceBasis || "",
           challenge: suggestion.challenge || "",
           sourceUrls: Array.isArray(suggestion.sourceUrls) ? suggestion.sourceUrls : [],
           origin: "ai-discovery"
-        };
-        connections.push(link);
-        added.push(link);
+        });
       });
+      pendingSuggestions = pendingSuggestions.concat(found);
+      localStorage.setItem("td-auto-discovery-pending", JSON.stringify(pendingSuggestions));
       localStorage.setItem("td-auto-discovery-hash", fingerprint());
-      originalSaveAll();
-      if (typeof draw === "function") draw();
-      renderDiscoveryResults(added);
-      setStatus(added.length
-        ? "Found " + added.length + " new possible connection" + (added.length === 1 ? "" : "s") + ". They are marked as tentative leads for you to check."
-        : "No new well-supported links found this time. I will check again when the evidence changes.");
+      renderDiscoveryResults();
+      setStatus(found.length
+        ? "Found " + found.length + " possible connection" + (found.length === 1 ? "" : "s") + ". Review each suggestion below before adding it to your map."
+        : "No new useful links found this time. I will check again when your evidence changes.");
     } catch (error) {
       setStatus("Discovery paused: " + error.message + " I will retry automatically in 30 seconds.");
       scheduleDiscovery(30000);
@@ -83,21 +80,45 @@
       discoveryBusy = false;
     }
   }
-  function renderDiscoveryResults(added) {
+  function renderDiscoveryResults() {
     const host = $("autoDiscoveryResults");
     if (!host) return;
-    const suggestions = (added && added.length ? added : connections.filter(link => link.origin === "ai-discovery")).slice(-8).reverse();
+    const suggestions = pendingSuggestions.slice().reverse();
     if (!suggestions.length) {
-      host.innerHTML = '<p class="small-note">New suggestions will appear here as they are discovered.</p>';
+      host.innerHTML = '<p class="small-note">No suggestions waiting for review. New ideas will appear here automatically.</p>';
       return;
     }
     host.innerHTML = suggestions.map(link => {
       const a = evidenceById(link.from), b = evidenceById(link.to);
       if (!a || !b) return "";
-      const urls = (link.sourceUrls || []).map(url => '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Check source</a>').join(" · ");
-      return '<article class="auto-discovery-card"><span class="auto-discovery-tag">AI suggested · ' + esc(link.strength || "Tentative") + '</span><strong>' + esc(a.claim) + ' ↔ ' + esc(b.claim) + '</strong><p>' + esc(link.text) + '</p><p>' + esc(link.reason || "") + '</p>' + (link.evidenceBasis ? '<p><b>Evidence to check:</b> ' + esc(link.evidenceBasis) + '</p>' : '') + (link.challenge ? '<p><b>Possible weakness:</b> ' + esc(link.challenge) + '</p>' : '') + (urls ? '<p>' + urls + '</p>' : '<p class="small-note">No direct source link returned; treat as an unverified research lead.</p>') + '</article>';
+      const urls = (link.sourceUrls || []).filter(url => typeof url === "string" && (url.startsWith("https://") || url.startsWith("http://"))).map(url => '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Check source</a>').join(" · ");
+      return '<article class="auto-discovery-card"><span class="auto-discovery-tag">AI suggested · ' + esc(link.strength || "Tentative") + ' · Not yet added</span><strong>' + esc(a.claim) + ' ↔ ' + esc(b.claim) + '</strong><p>' + esc(link.text) + '</p><p>' + esc(link.reason || "") + '</p>' + (link.evidenceBasis ? '<p><b>Evidence to check:</b> ' + esc(link.evidenceBasis) + '</p>' : '') + (link.challenge ? '<p><b>Possible weakness:</b> ' + esc(link.challenge) + '</p>' : '') + (urls ? '<p>' + urls + '</p>' : '<p class="small-note">No direct source link returned; treat as an unverified research lead.</p>') + '<div class="discovery-review-actions"><button type="button" data-discovery-accept="' + esc(link.id) + '">Add to connection map</button><button type="button" class="secondary" data-discovery-dismiss="' + esc(link.id) + '">Dismiss</button></div></article>';
     }).join("");
   }
+  $("autoDiscoveryResults").addEventListener("click", event => {
+    const accept = event.target.closest("[data-discovery-accept]");
+    const dismiss = event.target.closest("[data-discovery-dismiss]");
+    const id = (accept && accept.dataset.discoveryAccept) || (dismiss && dismiss.dataset.discoveryDismiss);
+    if (!id) return;
+    const index = pendingSuggestions.findIndex(link => link.id === id);
+    if (index < 0) return;
+    const suggestion = pendingSuggestions[index];
+    pendingSuggestions.splice(index,1);
+    localStorage.setItem("td-auto-discovery-pending", JSON.stringify(pendingSuggestions));
+    if (accept) {
+      if (!connections.some(link => pairKey(link.from,link.to) === pairKey(suggestion.from,suggestion.to))) {
+        connections.push(suggestion);
+        originalSaveAll();
+        if (typeof draw === "function") draw();
+        setStatus("Connection added to your map as a tentative research lead. Check its sources and possible weaknesses.");
+      }
+    } else {
+      dismissedPairs.add(pairKey(suggestion.from,suggestion.to));
+      localStorage.setItem("td-auto-discovery-dismissed", JSON.stringify(Array.from(dismissedPairs)));
+      setStatus("Suggestion dismissed. I will not suggest this pair again.");
+    }
+    renderDiscoveryResults();
+  });
   function scheduleDiscovery(delay=1600) {
     clearTimeout(discoveryTimer);
     discoveryTimer = setTimeout(discoverConnections, delay);
@@ -195,7 +216,7 @@
   $("mapZoomIn").addEventListener("click",()=>setZoom(graphZoom+.15));
   $("mapZoomOut").addEventListener("click",()=>setZoom(graphZoom-.15));
   $("mapFit").addEventListener("click",()=>{graphZoom=1;setZoom(1);const wrap=document.querySelector(".network-canvas-wrap");if(wrap){wrap.scrollTop=0;wrap.scrollLeft=0;}});
-  renderDiscoveryResults([]);
+  renderDiscoveryResults();
   setStatus("Checking your saved evidence for possible connections…");
   scheduleDiscovery(1200);
   });
