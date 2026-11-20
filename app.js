@@ -127,7 +127,7 @@ function renderCitations(container, citations) {
   container.appendChild(heading);
   const list = document.createElement("ul");
   citations.forEach(source => {
-    if (!source.url || !/^https?:\\/\\//i.test(source.url)) return;
+    if (!source.url || !(source.url.startsWith("https://") || source.url.startsWith("http://"))) return;
     const li = document.createElement("li");
     const link = document.createElement("a");
     link.href = source.url;
