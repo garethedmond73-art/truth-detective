@@ -264,13 +264,24 @@ function renderInvestigationArchive() {
     host.innerHTML = '<p class="small-note">Saved investigations will appear here on this device.</p>';
     return;
   }
-  host.innerHTML = investigations.slice().reverse().map(record => `
-    <article class="archive-card">
-      <strong>${esc(record.question)}</strong>
-      <p class="archive-meta">${esc(new Date(record.createdAt).toLocaleString())} · ${esc(record.type || "Investigation")}</p>
-      <p class="archive-preview">${esc(record.answer.slice(0, 420))}${record.answer.length > 420 ? "…" : ""}</p>
-      <button class="secondary" onclick="addInvestigationToLedger('${esc(record.id)}')" disabled>Automatically added</button>
-    </article>`).join("");
+  host.innerHTML = investigations.slice().reverse().map(record => {
+    const answer = renderSafeMarkdown(record.answer || "");
+    const sources = (Array.isArray(record.citations) ? record.citations : [])
+      .filter(source => source && /^https?:\\/\\//i.test(source.url || ""))
+      .map(source => '<li><a href="' + esc(source.url) + '" target="_blank" rel="noopener noreferrer">' +
+        esc(source.title || source.url) + '</a></li>').join("");
+    return `
+      <article class="archive-card">
+        <strong>${esc(record.question)}</strong>
+        <p class="archive-meta">${esc(new Date(record.createdAt).toLocaleString())} · ${esc(record.type || "Investigation")}</p>
+        <details class="archive-full-answer">
+          <summary>Read the full investigation</summary>
+          <div class="archive-answer-text">${answer}</div>
+          ${sources ? '<h4>Sources</h4><ul>' + sources + '</ul>' : ''}
+        </details>
+        <button class="secondary" onclick="addInvestigationToLedger('${esc(record.id)}')" disabled>Automatically added to evidence ledger</button>
+      </article>`;
+  }).join("");
 }
 function renderSafeMarkdown(markdown) {
   const inline = value => {
