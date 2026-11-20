@@ -124,6 +124,16 @@ function drawNetworkGraph(path){
  $("networkSummary").textContent=nodes.length+" topics · "+links.length+" proposed connections";const hubs=nodes.slice().sort((x,y)=>degree[y.id]-degree[x.id]).slice(0,5);$("hubList").innerHTML="<strong>Most connected topics</strong><ol>"+hubs.map(n=>"<li>"+esc(n.claim)+" <span>"+degree[n.id]+" links</span></li>").join("")+"</ol>";
 }
 function findNetworkPath(){const start=$("pathStart").value,end=$("pathEnd").value;if(!start||!end||start===end){$("pathExplanation").textContent="Choose two different topics.";return;}const adj={};items.forEach(n=>adj[n.id]=[]);connections.forEach(l=>{if(adj[l.from]&&adj[l.to]){adj[l.from].push(l.to);adj[l.to].push(l.from);}});const queue=[start],prev={};prev[start]=null;while(queue.length){const id=queue.shift();if(id===end)break;(adj[id]||[]).forEach(next=>{if(!(next in prev)){prev[next]=id;queue.push(next);}});}if(!(end in prev)){drawNetworkGraph([]);$("pathExplanation").textContent="No recorded route connects those topics yet. That gap shows where more evidence or a justified link may be needed.";return;}const path=[];let id=end;while(id){path.unshift(id);id=prev[id];}drawNetworkGraph(path);$("pathExplanation").textContent="Possible route ("+(path.length-1)+" links): "+path.map(id=>evidenceById(id).claim).join(" → ")+". This is the shortest recorded route, not a measure of truth or evidence quality.";}
+function analyseNetwork(){
+const host=$("networkAnalysis"),links=connections.filter(l=>evidenceById(l.from)&&evidenceById(l.to)),degree={};items.forEach(n=>degree[n.id]=0);links.forEach(l=>{degree[l.from]++;degree[l.to]++;});
+const ranked=items.map(n=>({n,count:degree[n.id]})).sort((a,b)=>b.count-a.count),hubs=ranked.filter(x=>x.count).slice(0,3),alone=ranked.filter(x=>!x.count),adj={};items.forEach(n=>adj[n.id]=[]);links.forEach(l=>{adj[l.from].push(l.to);adj[l.to].push(l.from);});
+const routes=[];for(let i=0;i<ranked.length;i++)for(let j=i+1;j<ranked.length;j++){let st=ranked[i].n.id,en=ranked[j].n.id;if(!degree[st]||!degree[en])continue;let q=[st],prev={[st]:null};while(q.length){let id=q.shift();if(id===en)break;adj[id].forEach(v=>{if(!(v in prev)){prev[v]=id;q.push(v);}});}if(en in prev){let p=[],id=en;while(id){p.unshift(id);id=prev[id];}if(p.length>2)routes.push(p);}}
+let out="<h3>Map report</h3><p>"+items.length+" topics and "+links.length+" connections.</p><h4>Most connected topics</h4>"+(hubs.length?"<ol>"+hubs.map(x=>"<li>"+esc(x.n.claim)+" — "+x.count+" links</li>").join("")+"</ol>":"<p>No connections yet.</p>");
+out+="<h4>Possible routes</h4>"+(routes.length?"<ol>"+routes.slice(0,3).map(p=>"<li>"+p.map(id=>esc(evidenceById(id).claim)).join(" → ")+"</li>").join("")+"</ol>":"<p>Add more links to create multi-step routes.</p>");
+out+="<h4>Topics needing links</h4>"+(alone.length?"<ul>"+alone.slice(0,5).map(x=>"<li>"+esc(x.n.claim)+" has no links yet.</li>").join("")+"</ul>":"<p>Every topic has at least one link.</p>");
+out+="<p><strong>Remember:</strong> lots of links do not mean an idea is true. Check the sources and look for evidence that could prove it wrong.</p><button type='button' id='askMapQuestion'>Investigate a possible route</button>";host.innerHTML=out;
+const route=routes[0]?routes[0].map(id=>evidenceById(id).claim).join(" → "):"Which two topics have a connection supported by independent evidence?";$("askMapQuestion").onclick=()=>{$("detectiveQuestion").value="Investigate this possible route: "+route+". Check independent evidence for every link, find weak points, give alternative explanations and say what could disprove it.";$("askForm").scrollIntoView({behavior:"smooth",block:"center"});};
+}
 function drawConnections() {
   const host = $("connections");
   if (!connections.length) {
@@ -150,6 +160,7 @@ function drawConnections() {
 
 window.toggleNetworkExplorer = function(){const panel=$("networkExplorer"),button=$("openNetwork");panel.hidden=!panel.hidden;button.textContent=panel.hidden?"Explore visual connection map":"Hide visual connection map";if(!panel.hidden){fillPathSelectors();drawNetworkGraph([]);panel.scrollIntoView({behavior:"smooth",block:"start"});}};
 $("findPath").addEventListener("click",findNetworkPath);
+$("analyseNetwork").addEventListener("click",analyseNetwork);
 $("clearPath").addEventListener("click",()=>{drawNetworkGraph([]);$("pathExplanation").textContent="Choose two topics to trace a route. A path is a research lead, not proof.";});
 window.removeItem = id => {
   items = items.filter(item => item.id !== id);
