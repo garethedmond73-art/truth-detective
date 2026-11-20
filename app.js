@@ -101,6 +101,7 @@ function draw() {
   `).join("");
   drawConnectionSelectors();
   drawConnections();
+  if (!$("networkExplorer").hidden) { fillPathSelectors(); drawNetworkGraph([]); }
 }
 
 function drawConnectionSelectors() {
@@ -111,6 +112,18 @@ function drawConnectionSelectors() {
   $("addConnection").disabled = items.length < 2;
   $("addConnection").title = items.length < 2 ? "Add at least two evidence records first" : "Connect two evidence records";
 }
+function fillPathSelectors(){const opts=items.map(n=>'<option value="'+esc(n.id)+'">'+esc(n.claim.slice(0,100))+'</option>').join("");$("pathStart").innerHTML=opts;$("pathEnd").innerHTML=opts;if(items.length>1)$("pathEnd").selectedIndex=1;}
+function drawNetworkGraph(path){
+ const svg=$("networkSvg"),ns="http://www.w3.org/2000/svg",w=1000,h=680,nodes=items,links=connections.filter(l=>evidenceById(l.from)&&evidenceById(l.to)&&l.from!==l.to),degree={},pos={};
+ nodes.forEach(n=>degree[n.id]=0);links.forEach(l=>{degree[l.from]++;degree[l.to]++;});
+ nodes.forEach((n,i)=>{const angle=2*Math.PI*i/Math.max(1,nodes.length)-Math.PI/2,r=Math.min(270,110+nodes.length*5);pos[n.id]={x:w/2+Math.cos(angle)*r,y:h/2+Math.sin(angle)*r};});
+ for(let step=0;step<110;step++){const f={};nodes.forEach(n=>f[n.id]={x:0,y:0});for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const p=pos[nodes[i].id],q=pos[nodes[j].id],dx=q.x-p.x,dy=q.y-p.y,d=Math.max(1,Math.hypot(dx,dy)),v=1800/(d*d);f[nodes[i].id].x-=dx/d*v;f[nodes[i].id].y-=dy/d*v;f[nodes[j].id].x+=dx/d*v;f[nodes[j].id].y+=dy/d*v;}links.forEach(l=>{const p=pos[l.from],q=pos[l.to],dx=q.x-p.x,dy=q.y-p.y,d=Math.max(1,Math.hypot(dx,dy)),v=(d-150)*.0015;f[l.from].x+=dx*v;f[l.from].y+=dy*v;f[l.to].x-=dx*v;f[l.to].y-=dy*v;});nodes.forEach(n=>{const p=pos[n.id],v=f[n.id];v.x+=(w/2-p.x)*.0008;v.y+=(h/2-p.y)*.0008;p.x=Math.max(65,Math.min(w-65,p.x+v.x));p.y=Math.max(55,Math.min(h-55,p.y+v.y));});}
+ svg.replaceChildren();const pathSet=new Set(path||[]);
+ links.forEach(l=>{const p=pos[l.from],q=pos[l.to],line=document.createElementNS(ns,"line");line.setAttribute("x1",p.x);line.setAttribute("y1",p.y);line.setAttribute("x2",q.x);line.setAttribute("y2",q.y);line.setAttribute("class","network-edge"+(pathSet.has(l.from)&&pathSet.has(l.to)?" path-edge":""));svg.appendChild(line);const label=document.createElementNS(ns,"text");label.setAttribute("x",(p.x+q.x)/2);label.setAttribute("y",(p.y+q.y)/2-6);label.setAttribute("class","network-edge-label");label.textContent=(l.text||"Possible link").slice(0,42);svg.appendChild(label);});
+ nodes.forEach(n=>{const p=pos[n.id],g=document.createElementNS(ns,"g"),circle=document.createElementNS(ns,"circle"),t=document.createElementNS(ns,"text"),d=document.createElementNS(ns,"text"),count=degree[n.id]||0;g.setAttribute("class","network-node"+(pathSet.has(n.id)?" path-node":""));g.setAttribute("tabindex","0");g.setAttribute("role","button");circle.setAttribute("cx",p.x);circle.setAttribute("cy",p.y);circle.setAttribute("r",Math.min(32,19+count*2));g.appendChild(circle);t.setAttribute("x",p.x);t.setAttribute("y",p.y+44);t.textContent=n.claim.slice(0,25)+(n.claim.length>25?"…":"");g.appendChild(t);d.setAttribute("x",p.x);d.setAttribute("y",p.y+5);d.setAttribute("class","network-degree");d.textContent=String(count);g.appendChild(d);const choose=()=>{$("pathStart").value=n.id;$("pathExplanation").textContent="Start selected: "+n.claim+". Choose a destination.";};g.addEventListener("click",choose);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();choose();}});const title=document.createElementNS(ns,"title");title.textContent=n.claim+" — "+count+" links";g.appendChild(title);svg.appendChild(g);});
+ $("networkSummary").textContent=nodes.length+" topics · "+links.length+" proposed connections";const hubs=nodes.slice().sort((x,y)=>degree[y.id]-degree[x.id]).slice(0,5);$("hubList").innerHTML="<strong>Most connected topics</strong><ol>"+hubs.map(n=>"<li>"+esc(n.claim)+" <span>"+degree[n.id]+" links</span></li>").join("")+"</ol>";
+}
+function findNetworkPath(){const start=$("pathStart").value,end=$("pathEnd").value;if(!start||!end||start===end){$("pathExplanation").textContent="Choose two different topics.";return;}const adj={};items.forEach(n=>adj[n.id]=[]);connections.forEach(l=>{if(adj[l.from]&&adj[l.to]){adj[l.from].push(l.to);adj[l.to].push(l.from);}});const queue=[start],prev={};prev[start]=null;while(queue.length){const id=queue.shift();if(id===end)break;(adj[id]||[]).forEach(next=>{if(!(next in prev)){prev[next]=id;queue.push(next);}});}if(!(end in prev)){drawNetworkGraph([]);$("pathExplanation").textContent="No recorded route connects those topics yet. That gap shows where more evidence or a justified link may be needed.";return;}const path=[];let id=end;while(id){path.unshift(id);id=prev[id];}drawNetworkGraph(path);$("pathExplanation").textContent="Possible route ("+(path.length-1)+" links): "+path.map(id=>evidenceById(id).claim).join(" → ")+". This is the shortest recorded route, not a measure of truth or evidence quality.";}
 function drawConnections() {
   const host = $("connections");
   if (!connections.length) {
@@ -135,6 +148,9 @@ function drawConnections() {
   }).join("") || '<p class="small-note">Some links refer to evidence that has been deleted. Remove those links or add the evidence again.</p>';
 }
 
+$("openNetwork").addEventListener("click",()=>{const panel=$("networkExplorer");panel.hidden=!panel.hidden;$("openNetwork").textContent=panel.hidden?"Explore visual connection map":"Hide visual connection map";if(!panel.hidden){fillPathSelectors();drawNetworkGraph([]);panel.scrollIntoView({behavior:"smooth",block:"start"});}});
+$("findPath").addEventListener("click",findNetworkPath);
+$("clearPath").addEventListener("click",()=>{drawNetworkGraph([]);$("pathExplanation").textContent="Choose two topics to trace a route. A path is a research lead, not proof.";});
 window.removeItem = id => {
   items = items.filter(item => item.id !== id);
   connections = connections.filter(link => link.from !== id && link.to !== id);
