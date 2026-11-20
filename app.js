@@ -111,3 +111,56 @@ $("saveConnection").onclick = event => {
 };
 saveAll();
 draw();
+
+// AI investigator — calls the Cloudflare Worker; the API key never reaches the browser.
+const DETECTIVE_API = "https://truth-detective-ai.garethedmond73.workers.dev/ask";
+const askForm = $("askForm");
+if (askForm) {
+  askForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    const question = $("detectiveQuestion").value.trim();
+    const answerBox = $("detectiveAnswer");
+    const askButton = $("askButton");
+    if (!question) return;
+    askButton.disabled = true;
+    askButton.textContent = "Investigating…";
+    answerBox.textContent = "The detective is examining the evidence. This may take a little while…";
+    try {
+      const response = await fetch(DETECTIVE_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "The investigation could not be completed.");
+      answerBox.replaceChildren();
+      const answerText = document.createElement("div");
+      answerText.className = "detective-answer-text";
+      answerText.textContent = data.answer || "No answer was returned.";
+      answerBox.appendChild(answerText);
+      if (Array.isArray(data.citations) && data.citations.length) {
+        const heading = document.createElement("h3");
+        heading.textContent = "Sources";
+        answerBox.appendChild(heading);
+        const list = document.createElement("ul");
+        data.citations.forEach(source => {
+          if (!source.url || !/^https?:\/\//i.test(source.url)) return;
+          const item = document.createElement("li");
+          const link = document.createElement("a");
+          link.href = source.url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = source.title || source.url;
+          item.appendChild(link);
+          list.appendChild(item);
+        });
+        if (list.children.length) answerBox.appendChild(list);
+      }
+    } catch (error) {
+      answerBox.textContent = "Investigation error: " + error.message;
+    } finally {
+      askButton.disabled = false;
+      askButton.textContent = "Investigate";
+    }
+  });
+}
