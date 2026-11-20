@@ -119,6 +119,7 @@ function investigationDisplayTitle(record) {
   if (type === "Whole-board theory comparison") return "Compare all theories";
   if (type === "Missing-link analysis") return "Find missing links";
   if (type === "Truth test") return "Truth Testing Engine review";
+  if (type === "Evidence trail") return "Evidence Trail investigation";
   return String(record?.question || "Investigation").slice(0,180);
 }
 
@@ -335,6 +336,7 @@ function renderInvestigationArchive() {
       <article class="archive-card">
         <strong>${esc(investigationDisplayTitle(record))}</strong>
         <p class="archive-meta">${esc(new Date(record.createdAt).toLocaleString())} · ${esc(record.type || "Investigation")}</p>
+        ${record.trailFrom ? '<p class="archive-meta">Following clue: ' + esc(record.trailFrom.claim) + '</p>' : ''}
         <details class="archive-full-answer">
           <summary>Read the full investigation</summary>
           <div class="archive-answer-text">${answer}</div>
@@ -487,6 +489,7 @@ async function requestInvestigation(question, type = "Investigation", options = 
     const record = {
       id: "i-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
       question,
+      trailFrom: options.trailFrom ? { id: options.trailFrom.id, claim: options.trailFrom.claim } : null,
       answer: data.answer,
       citations: Array.isArray(data.citations) ? data.citations : [],
       createdAt: new Date().toISOString(),
@@ -502,8 +505,8 @@ async function requestInvestigation(question, type = "Investigation", options = 
     items.push({
       id: "e-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
       investigationId: record.id,
-      claim: (type === "Comparison" ? "Comparison: " : "Investigation: ") + question.slice(0, 220),
-      kind: type === "Comparison" ? "AI theory comparison" : "AI investigation",
+      claim: (type === "Comparison" ? "Comparison: " : type === "Evidence trail" ? "Evidence trail: " : "Investigation: ") + question.slice(0, 220),
+      kind: type === "Comparison" ? "AI theory comparison" : type === "Evidence trail" ? "Evidence trail research" : "AI investigation",
       status: "Needs review",
       source: sourceList || "No web citations returned — AI synthesis only",
       pattern: "",
