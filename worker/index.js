@@ -241,9 +241,9 @@ ${JSON.stringify(existingConnections)}`;
             : isTruthTest
               ? "Perform a concise but rigorous evidence-quality audit. Use web search to check key claims and source independence. Do not invent citations, source relationships or prior confidence levels. Clearly disclose limits and uncertainty.\\n\\n" + question
               : question,
-          max_output_tokens: isTruthTest ? 3200 : isBoardReview ? 2600 : 5000
+          max_output_tokens: isTruthTest ? 1800 : isBoardReview ? 2600 : 5000
         }),
-        signal: AbortSignal.timeout(isFastMode ? 60000 : 90000)
+        signal: AbortSignal.timeout(isTruthTest ? 90000 : isBoardReview ? 60000 : 90000)
       });
 
       const raw = await upstream.text();
@@ -271,7 +271,7 @@ ${JSON.stringify(existingConnections)}`;
       return json({
         error: timedOut
           ? (isTruthTest
-              ? "The truth test took too long. Please try again; your saved evidence has not been changed."
+              ? "The truth test timed out. No review was saved and your existing evidence is unchanged. Try again with fewer saved notes, or run a normal investigation on one claim."
               : isBoardReview
                 ? "The quick board review timed out. Please try again; your saved evidence has not been changed."
                 : "The investigation took too long. Please try again.")
