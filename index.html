@@ -66,6 +66,14 @@
 <button type="button" id="compareTheoriesButton" class="secondary">Compare all theories</button>
 <button type="button" id="missingLinksButton" class="secondary">Find missing links</button>
 </div>
+<section class="evidence-trail-panel" aria-labelledby="evidenceTrailHeading">
+<h3 id="evidenceTrailHeading">Evidence Trail Engine</h3>
+<p>Choose a clue from your evidence ledger. The Detective will trace its sources, search for supporting and opposing findings, and suggest the next useful leads. Each successful trail is saved to your archive and ledger.</p>
+<label for="trailEvidenceSelect">Choose a clue to follow</label>
+<select id="trailEvidenceSelect" class="trail-evidence-select"><option value="">Loading saved evidence…</option></select>
+<button type="button" id="followEvidenceTrailButton">Follow this evidence trail</button>
+<p id="evidenceTrailStatus" class="small-note" aria-live="polite">Select a clue to start. Nothing in your existing evidence will be overwritten.</p>
+</section>
 <section class="truth-test-panel" aria-labelledby="truthTestHeading">
 <h3 id="truthTestHeading">Truth Testing Engine</h3>
 <p>Challenge the board, check source independence, look for confirmation bias and track how confidence should change. This is an evidence-quality review, not a numerical truth score.</p>
