@@ -103,9 +103,8 @@ function readableEvidenceField(label, value) {
     }
   } catch (_) {}
   if (!html) {
-    html = esc(raw)
-      .replace(/&quot;([A-Za-z][A-Za-z0-9_]*)&quot;\s*:/g, '<strong>$1:</strong> ')
-      .replace(/\s*,\s*(?=&quot;[A-Za-z][A-Za-z0-9_]*&quot;\s*:)/g, '<br>');
+    // Render research prose as Markdown so bold text, headings and citations are readable.
+    html = renderSafeMarkdown(raw);
   }
   if (raw.length > 260 || html.includes("readable-json-record")) {
     return '<details class="evidence-long-field"><summary>Read ' + esc(label.toLowerCase()) + ' (' + raw.length + ' characters)</summary><div class="evidence-field-content">' + html + '</div></details>';
@@ -348,20 +347,30 @@ function renderInvestigationArchive() {
 }
 function renderSafeMarkdown(markdown) {
   const inline = value => {
-    let out = esc(value);
-    out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match,label,url) =>
-      '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
+    const savedLinks = [];
+    let source = String(value).replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/gi, (match,label,url) => {
+      const token = "ZZLINKTOKEN" + savedLinks.length + "ZZ";
+      savedLinks.push({token,label,url});
+      return token;
+    });
+    let out = esc(source);
     out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     out = out.replace(/\*(.+?)\*/g, "<em>$1</em>");
-    out = out.replace(/\`([^\`]+)\`/g, "<code>$1</code>");
-    out = out.replace(/(https?:\/\/[^\s<]+)/g, url => {
+    out = out.replace(/\x60([^\x60]+)\x60/g, "<code>$1</code>");
+    out = out.replace(/https?:\/\/[^\s<>&"]+/gi, url => {
       const clean = url.replace(/[.,;!?]+$/, "");
       const tail = url.slice(clean.length);
       return '<a href="' + esc(clean) + '" target="_blank" rel="noopener noreferrer">' + esc(clean) + '</a>' + tail;
     });
+    savedLinks.forEach(link => {
+      const anchor = '<a href="' + esc(link.url) + '" target="_blank" rel="noopener noreferrer">' + esc(link.label) + '</a>';
+      out = out.replace(link.token, anchor);
+    });
     return out;
   };
-  const lines = String(markdown || "").replace(/\r/g, "").replace(/"\s*target="_blank"\s*rel="noopener noreferrer">[^)\n]*/g, "").split("\n");
+  const normalized = String(markdown || "").replace(/\r/g, "")
+    .replace(/[ \t]+(#{1,3})[ \t]+(?=[A-Z])/g, "\n$1 ");
+  const lines = normalized.split("\n");
   const blocks = [];
   let paragraph = [], list = [], listType = "";
   const flushParagraph = () => {
