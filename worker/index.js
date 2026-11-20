@@ -16,6 +16,16 @@ THE QUESTION; THE EVIDENCE; SCRIPTURE & PHILOSOPHY; SCIENCE & HISTORY;
 PATTERNS & CONNECTIONS; ALTERNATIVE EXPLANATIONS;
 THE MOST LIKELY EXPLANATION; WHAT WE STILL DON'T KNOW.
 
+Finish every substantial investigation with a section headed exactly:
+EVIDENCE SCORECARD
+Under it, give these five labelled assessments:
+- Evidence quality: Strong / Mixed / Limited / Not yet checked, with a brief reason.
+- Independent sources: say whether sources are independent or repeat the same underlying claim; name the basis.
+- Counter-evidence: strongest credible challenge found, or say none was located (not that none exists).
+- Unknowns: the most important unanswered question.
+- Confidence: Low / Medium / High, with a brief explanation tied to the evidence.
+Never give a percentage or imply this is an objective truth score. Do not award high confidence merely because many sources repeat one claim. If web citations were not returned, say so and keep confidence appropriately limited. Distinguish evidence about a claim from evidence that merely makes it interesting.
+
 Be respectful of beliefs without simply agreeing with the user. Conclusions are provisional.
 `;
 
