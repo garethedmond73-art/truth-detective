@@ -11,22 +11,28 @@
   const compact = (value, max=1100) => String(value || "").slice(0,max);
 
   function boardContext() {
-    const evidence = items.slice(-14).map((item,index) => ({
-      id:item.id || "item-"+index, claim:compact(item.claim,160), perspective:compact(item.kind,40),
-      assessment:compact(item.status,50), source:compact(item.source,60),
-      observedPattern:compact(item.pattern,60), possibleMeaning:compact(item.meaning,60),
-      alternative:compact(item.alternative,60), support:compact(item.support,60), challenge:compact(item.challenge,60)
+    const evidenceLimit = 18, linkLimit = 24, historyLimit = 4;
+    const evidence = items.slice(-evidenceLimit).map((item,index) => ({
+      id:item.id || "item-"+index, claim:compact(item.claim,180), perspective:compact(item.kind,45),
+      assessment:compact(item.status,55), source:compact(item.source,130),
+      observedPattern:compact(item.pattern,150), possibleMeaning:compact(item.meaning,130),
+      alternative:compact(item.alternative,120), support:compact(item.support,150), challenge:compact(item.challenge,130)
     }));
-    const links = connections.slice(-10).map(link => ({
-      from:link.from,to:link.to,description:compact(link.text,100),
-      reason:compact(link.reason,100),strength:compact(link.strength,30),
+    const links = connections.slice(-linkLimit).map(link => ({
+      from:link.from,to:link.to,description:compact(link.text,140),
+      reason:compact(link.reason,150),strength:compact(link.strength,30),
       automatic:link.origin === "ai-discovery"
     }));
-    const history = investigations.slice(-3).map(record => ({
+    const history = investigations.slice(-historyLimit).map(record => ({
       question:compact(record.question,220),type:compact(record.type,50),
-      conclusion:compact(record.answer,500),date:record.createdAt
+      conclusion:compact(record.answer,350),date:record.createdAt
     }));
-    return {evidence,links,history};
+    return {
+      totalEvidence:items.length, omittedEvidence:Math.max(0,items.length-evidence.length),
+      totalConnections:connections.length, omittedConnections:Math.max(0,connections.length-links.length),
+      totalInvestigations:investigations.length, omittedInvestigations:Math.max(0,investigations.length-history.length),
+      evidence,links,history
+    };
   }
   async function runBoardReview(kind, button, label, promptBuilder) {
     if (!items.length && !investigations.length) {
@@ -51,6 +57,7 @@
       "EVIDENCE RECORDS:",JSON.stringify(context.evidence),
       "RECORDED CONNECTIONS:",JSON.stringify(context.links),
       "RECENT INVESTIGATION HISTORY:",JSON.stringify(context.history),
+      "BOARD COVERAGE:",JSON.stringify({totalEvidence:context.totalEvidence,omittedEvidence:context.omittedEvidence,totalConnections:context.totalConnections,omittedConnections:context.omittedConnections,totalInvestigations:context.totalInvestigations,omittedInvestigations:context.omittedInvestigations}),
       "Produce a clear evolving overview with these headings:",
       "1. THE BIG PICTURE — the broadest defensible picture, without forcing a grand unified theory.",
       "2. WHAT IS BEST ESTABLISHED — only claims supported by reliable, independent evidence; say when the board itself is insufficient.",
@@ -70,6 +77,7 @@
       "EVIDENCE:",JSON.stringify(context.evidence),
       "CONNECTIONS:",JSON.stringify(context.links),
       "PREVIOUS INVESTIGATIONS:",JSON.stringify(context.history),
+      "BOARD COVERAGE:",JSON.stringify({totalEvidence:context.totalEvidence,omittedEvidence:context.omittedEvidence,totalConnections:context.totalConnections,omittedConnections:context.omittedConnections,totalInvestigations:context.totalInvestigations,omittedInvestigations:context.omittedInvestigations}),
       "Identify the main competing explanations that genuinely address the same question. Do not compare unrelated claims just because they share a theme.",
       "For each explanation provide: strongest support, strongest challenge, assumptions, what it explains, what it fails to explain, and a specific observation or source that would discriminate it from rivals.",
       "Then give a fair comparison matrix in text, note where evidence is asymmetric or missing, and state whether any explanation currently leads or whether the evidence is inconclusive. Distinguish evidence from interpretation and speculation. Seek independent sources and cite them. Never manufacture a winner."
@@ -82,6 +90,7 @@
       "EVIDENCE:",JSON.stringify(context.evidence),
       "EXISTING CONNECTIONS:",JSON.stringify(context.links),
       "RECENT INVESTIGATIONS:",JSON.stringify(context.history),
+      "BOARD COVERAGE:",JSON.stringify({totalEvidence:context.totalEvidence,omittedEvidence:context.omittedEvidence,totalConnections:context.totalConnections,omittedConnections:context.omittedConnections,totalInvestigations:context.totalInvestigations,omittedInvestigations:context.omittedInvestigations}),
       "Find up to 7 important missing links, missing evidence or broken steps in the reasoning. A missing link means a necessary intermediate claim, source, mechanism, date, translation, prediction or causal step that is absent—not simply a pair of topics that sound similar.",
       "For each gap state: which records/questions it concerns; the exact missing step; what evidence could fill it; the strongest alternative explanation; and what finding would weaken or rule out the proposed link.",
       "Prioritise gaps that could change the overall conclusion. Separate 'no link recorded' from 'evidence shows no link'. Do not add invented connections to the map; report them as research tasks for review. Cite reliable sources when making factual claims."
