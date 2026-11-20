@@ -104,6 +104,17 @@ export default {
       return json({ error: "Not found. Use GET /health, POST /ask or POST /discover." }, 404);
     }
 
+    // Anonymous app protection: rate-limit by Cloudflare-observed client IP.
+    // This API is approximate and local to each Cloudflare location.
+    if (env.TD_RATE_LIMITER) {
+      const clientIp = request.headers.get("CF-Connecting-IP") || "unknown-client";
+      const cost = isDiscover ? 1 : 3;
+      const { success } = await env.TD_RATE_LIMITER.limit({ key: clientIp, delta: cost });
+      if (!success) {
+        return json({ error: "The Detective has reached its short-term request limit. Please wait a minute before trying again." }, 429, allowedOrigin);
+      }
+    }
+
     // The API is intentionally public for the static app; never expose the API key to the client.
 
     if (!env.OPENAI_API_KEY) {
