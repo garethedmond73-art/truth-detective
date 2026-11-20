@@ -95,3 +95,26 @@
 .evidence-trail-panel button{margin-top:12px;min-height:46px}
 .evidence-trail-panel p{overflow-wrap:anywhere}
 @media(max-width:520px){.evidence-trail-panel{padding:13px}.trail-evidence-select{font-size:16px}}
+
+/* Clearer reading hierarchy for long investigations on phones */
+.detective-answer-text,.archive-answer-text,.evidence-field-content{overflow-wrap:anywhere;word-break:normal;line-height:1.68}
+.detective-answer-text h2,.detective-answer-text h3,.detective-answer-text h4{color:#e0b66f;line-height:1.3;margin:20px 0 8px}
+.detective-answer-text h2{font-size:1.18rem}
+.detective-answer-text h3{font-size:1.08rem}
+.detective-answer-text p{margin:9px 0}
+.detective-answer-text ul,.detective-answer-text ol{padding-left:23px}
+.detective-answer-text li{margin:7px 0}
+.detective-answer-text a,.evidence-field-content a{color:#f0c77f;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.archive-preview{color:#d6e0e4;line-height:1.5;margin:9px 0}
+.archive-source-count{font-size:.82rem;color:#b9c8ce;margin:5px 0 10px}
+.archive-card>strong{display:block;font-size:1.04rem;line-height:1.4;overflow-wrap:anywhere}
+.archive-full-answer summary{min-height:44px;display:flex;align-items:center}
+.evidence-long-field summary{min-height:42px;display:flex;align-items:center}
+.evidence-field-content h2,.evidence-field-content h3,.evidence-field-content h4{color:#e0b66f;line-height:1.3;margin:16px 0 7px}
+.evidence-field-content p{margin:8px 0}
+@media(max-width:520px){
+ .detective-answer,.archive-card,.evidence-card{padding:12px}
+ .detective-answer-text{font-size:.97rem;line-height:1.65}
+ .archive-preview{font-size:.93rem}
+ .archive-full-answer summary,.evidence-long-field summary{font-size:.94rem}
+}
