@@ -38,7 +38,7 @@
     try {
       const context=boardContext();
       const result=await requestInvestigation(promptBuilder(context),kind);
-      status(result ? "Finished. The review has been saved to your investigation archive and evidence ledger." : "The review could not be completed. Check the message above and try again later.");
+      status(result ? "Finished. The review has been saved to your investigation archive and evidence ledger." : ( $("detectiveAnswer")?.textContent?.trim().slice(0,700) || "The review could not be completed. No detailed error was returned."));
     } finally {
       setBusy(button,false);
     }
