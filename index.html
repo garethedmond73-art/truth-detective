@@ -58,6 +58,26 @@
 <h3>Investigation archive</h3>
 <p class="small-note">Every successful investigation and theory comparison is automatically saved here and added to the evidence ledger as “Needs review”. Check citations and counter-evidence before treating claims as established.</p>
 <div id="investigationArchive"></div>
+<section class="research-tools-panel" aria-labelledby="researchToolsHeading">
+<h2 id="researchToolsHeading">Whole investigation tools</h2>
+<p>Let the Detective review the whole board, compare explanations and find gaps without you having to write a new question.</p>
+<div class="research-tool-actions">
+<button type="button" id="bigPictureButton">Build the big picture</button>
+<button type="button" id="compareTheoriesButton" class="secondary">Compare all theories</button>
+<button type="button" id="missingLinksButton" class="secondary">Find missing links</button>
+</div>
+<p id="researchToolsStatus" class="small-note" aria-live="polite">These tools use the evidence and investigations saved on this device.</p>
+<div class="backup-panel">
+<h3>Research backup</h3>
+<p class="small-note">Export a copy of your evidence, connections, investigation history and settings. Keep the file somewhere safe so you can restore it if you change phones or clear browser data.</p>
+<div class="research-tool-actions">
+<button type="button" id="exportBackupButton" class="secondary">Export backup</button>
+<button type="button" id="importBackupButton" class="secondary">Restore backup</button>
+<input type="file" id="importBackupFile" accept="application/json,.json" hidden>
+</div>
+<p id="backupStatus" class="small-note" aria-live="polite">Your current research is saved locally in this browser.</p>
+</div>
+</section>
 </main>
 
 <dialog id="dlg"><form method="dialog">
@@ -87,6 +107,7 @@
 
 <script src="./app.js"></script>
 <script src="./enhancements.js"></script>
+<script src="./research-tools.js"></script>
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
