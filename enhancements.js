@@ -10,6 +10,11 @@
   const $ = id => document.getElementById(id);
   const originalSaveAll = saveAll;
   const dismissedPairs = new Set(JSON.parse(localStorage.getItem("td-auto-discovery-dismissed") || "[]"));
+  const discoveryVersion = "review-queue-v2";
+  if (localStorage.getItem("td-auto-discovery-version") !== discoveryVersion) {
+    localStorage.removeItem("td-auto-discovery-hash");
+    localStorage.setItem("td-auto-discovery-version", discoveryVersion);
+  }
   let pendingSuggestions = JSON.parse(localStorage.getItem("td-auto-discovery-pending") || "[]");
   let discoveryTimer = null;
   let discoveryBusy = false;
@@ -216,6 +221,7 @@
   $("mapZoomIn").addEventListener("click",()=>setZoom(graphZoom+.15));
   $("mapZoomOut").addEventListener("click",()=>setZoom(graphZoom-.15));
   $("mapFit").addEventListener("click",()=>{graphZoom=1;setZoom(1);const wrap=document.querySelector(".network-canvas-wrap");if(wrap){wrap.scrollTop=0;wrap.scrollLeft=0;}});
+  if (typeof renderStarterQuestions === "function") renderStarterQuestions();
   renderDiscoveryResults();
   setStatus("Checking your saved evidence for possible connections…");
   scheduleDiscovery(1200);
