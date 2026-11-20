@@ -303,7 +303,7 @@ function renderInvestigationArchive() {
   host.innerHTML = investigations.slice().reverse().map(record => {
     const answer = renderSafeMarkdown(record.answer || "");
     const sources = (Array.isArray(record.citations) ? record.citations : [])
-      .filter(source => source && /^https?:\\/\\//i.test(source.url || ""))
+      .filter(source => source && /^https?:\/\//i.test(source.url || ""))
       .map(source => '<li><a href="' + esc(source.url) + '" target="_blank" rel="noopener noreferrer">' +
         esc(source.title || source.url) + '</a></li>').join("");
     return `
