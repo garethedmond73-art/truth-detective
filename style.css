@@ -37,3 +37,14 @@
 .backup-panel h3{margin-top:0}
 .research-tools-panel button:disabled{opacity:.6;cursor:wait}
 @media(max-width:520px){.research-tools-panel{padding:13px}.research-tool-actions{display:grid;grid-template-columns:1fr}.research-tool-actions button{width:100%}}
+
+
+.archive-full-answer{margin:14px 0;padding:12px;background:#101820;border:1px solid #52636c;border-radius:9px}
+.archive-full-answer summary{color:#e0b66f;font-weight:700;cursor:pointer;padding:4px 0}
+.archive-answer-text{margin-top:14px;overflow-wrap:anywhere;line-height:1.65}
+.archive-answer-text h2,.archive-answer-text h3,.archive-answer-text h4{color:#e0b66f;margin:18px 0 8px}
+.archive-answer-text p{margin:10px 0}
+.archive-answer-text ul,.archive-answer-text ol{padding-left:24px}
+.archive-answer-text li{margin:7px 0}
+.archive-answer-text a,.archive-full-answer a{color:#e0b66f;overflow-wrap:anywhere}
+.archive-full-answer h4{color:#e0b66f;margin-bottom:6px}
