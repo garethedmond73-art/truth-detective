@@ -219,6 +219,8 @@ ${JSON.stringify(existingConnections)}`;
 
     const question = body && body.question;
     const isBoardReview = body && body.mode === "board-review";
+    const isTruthTest = body && body.mode === "truth-test";
+    const isFastMode = isBoardReview || isTruthTest;
     if (typeof question !== "string" || !question.trim() || question.length > 22000) {
       return json({ error: "Please enter a question of up to 22,000 characters." }, 400, allowedOrigin);
     }
@@ -233,13 +235,15 @@ ${JSON.stringify(existingConnections)}`;
         body: JSON.stringify({
           model: env.OPENAI_MODEL || "gpt-6.2-astra",
           instructions: SYSTEM_PROMPT,
-          ...(isBoardReview ? {} : { tools: [{ type: "web_search", search_context_size: "medium" }] }),
+          ...(isBoardReview ? {} : { tools: [{ type: "web_search", search_context_size: isTruthTest ? "low" : "medium" }] }),
           input: isBoardReview
-            ? "This is a fast synthesis of existing user-provided research notes. Do not perform web searches or invent citations. Clearly identify what the notes support, what is uncertain, contradictions, and the most useful next question. Keep the answer concise and practical.\n\n" + question
-            : question,
-          max_output_tokens: isBoardReview ? 2600 : 5000
+            ? "This is a fast synthesis of existing user-provided research notes. Do not perform web searches or invent citations. Clearly identify what the notes support, what is uncertain, contradictions, and the most useful next question. Keep the answer concise and practical.\\n\\n" + question
+            : isTruthTest
+              ? "Perform a concise but rigorous evidence-quality audit. Use web search to check key claims and source independence. Do not invent citations, source relationships or prior confidence levels. Clearly disclose limits and uncertainty.\\n\\n" + question
+              : question,
+          max_output_tokens: isTruthTest ? 3200 : isBoardReview ? 2600 : 5000
         }),
-        signal: AbortSignal.timeout(isBoardReview ? 60000 : 90000)
+        signal: AbortSignal.timeout(isFastMode ? 60000 : 90000)
       });
 
       const raw = await upstream.text();
@@ -266,9 +270,11 @@ ${JSON.stringify(existingConnections)}`;
       const timedOut = error?.name === "TimeoutError";
       return json({
         error: timedOut
-          ? (isBoardReview
-              ? "The quick board review timed out. Please try again; your saved evidence has not been changed."
-              : "The investigation took too long. Please try again.")
+          ? (isTruthTest
+              ? "The truth test took too long. Please try again; your saved evidence has not been changed."
+              : isBoardReview
+                ? "The quick board review timed out. Please try again; your saved evidence has not been changed."
+                : "The investigation took too long. Please try again.")
           : "The detective could not reach the AI service. Please try again."
       }, 502, allowedOrigin);
     }
