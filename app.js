@@ -148,7 +148,7 @@ function drawConnections() {
   }).join("") || '<p class="small-note">Some links refer to evidence that has been deleted. Remove those links or add the evidence again.</p>';
 }
 
-$("openNetwork").addEventListener("click",()=>{const panel=$("networkExplorer");panel.hidden=!panel.hidden;$("openNetwork").textContent=panel.hidden?"Explore visual connection map":"Hide visual connection map";if(!panel.hidden){fillPathSelectors();drawNetworkGraph([]);panel.scrollIntoView({behavior:"smooth",block:"start"});}});
+window.toggleNetworkExplorer = function(){const panel=$("networkExplorer"),button=$("openNetwork");panel.hidden=!panel.hidden;button.textContent=panel.hidden?"Explore visual connection map":"Hide visual connection map";if(!panel.hidden){fillPathSelectors();drawNetworkGraph([]);panel.scrollIntoView({behavior:"smooth",block:"start"});}};
 $("findPath").addEventListener("click",findNetworkPath);
 $("clearPath").addEventListener("click",()=>{drawNetworkGraph([]);$("pathExplanation").textContent="Choose two topics to trace a route. A path is a research lead, not proof.";});
 window.removeItem = id => {
