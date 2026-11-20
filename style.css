@@ -2,3 +2,5 @@
 .detective-panel{margin:28px 0;padding:18px;background:#1b2a33;border:1px solid #e0b66f;border-radius:14px}.detective-panel h2{margin-top:0}.detective-panel label{margin:12px 0}.detective-answer{margin-top:16px;padding:14px;background:#101820;border:1px solid #40515b;border-radius:10px;white-space:normal;overflow-wrap:anywhere}.detective-answer:empty{display:none}.detective-answer-text{white-space:pre-wrap}.detective-answer h3{color:#e0b66f}.detective-answer a{color:#e0b66f;overflow-wrap:anywhere}.detective-panel button:disabled{opacity:.6}
 
 .archive-card{background:#1b2a33;border:1px solid #52636c;border-radius:10px;padding:14px;margin:12px 0}.archive-meta{color:#b9c8ce;font-size:.82rem}.archive-preview{white-space:pre-wrap;overflow-wrap:anywhere}.investigation-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.investigation-actions button{margin:0}
+
+.auto-added-note{color:#e0b66f;font-size:.9rem;margin:12px 0}.archive-card button:disabled{opacity:.7;cursor:default}
