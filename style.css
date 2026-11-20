@@ -87,3 +87,11 @@
  .connection-short-title{font-size:.96rem}
  .evidence-details-content button,.connection-details-content button{width:100%}
 }
+
+.evidence-trail-panel{margin:18px 0;padding:15px;background:#101820;border:1px solid #e0b66f;border-radius:11px}
+.evidence-trail-panel h3{margin-top:0;color:#e0b66f}
+.evidence-trail-panel label{display:block;margin:12px 0 6px;font-weight:650}
+.trail-evidence-select{width:100%;min-height:48px;padding:10px;border:1px solid #52636c;border-radius:8px;background:#1c2a31;color:inherit;font:inherit}
+.evidence-trail-panel button{margin-top:12px;min-height:46px}
+.evidence-trail-panel p{overflow-wrap:anywhere}
+@media(max-width:520px){.evidence-trail-panel{padding:13px}.trail-evidence-select{font-size:16px}}
