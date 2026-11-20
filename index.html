@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#101820">
-<meta name="description" content="An open-minded investigation into big questions through scripture, science, philosophy and human experience.">
+<meta name="description" content="An open-minded investigation into big questions through scripture, science, philosophy, symbols and human experience.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./icon.svg">
@@ -14,12 +14,13 @@
 <body>
 <header><h1>The Truth Detective</h1><p>An open-minded investigation into big questions.</p></header>
 <main>
-<h2>Four witness groups</h2>
+<h2>Five witness groups</h2>
 <div class="grid">
 <section><h3>Scripture</h3><p>Bible, Guru Granth Sahib, Torah, Quran and other traditions.</p></section>
 <section><h3>Science</h3><p>Physics, biology, neuroscience and cosmology.</p></section>
 <section><h3>Philosophy</h3><p>Consciousness, identity, reality and existence.</p></section>
 <section><h3>Human experience</h3><p>Personal accounts, dreams, history and lived experience.</p></section>
+<section class="pattern-card"><h3>Symbols &amp; language patterns</h3><p>Symbols, metaphors, number patterns, word roots, translation differences, repeated phrases, geometry and motifs across traditions.</p><p><strong>Our rule:</strong> record what we observe separately from what we think it means, then test alternative explanations.</p></section>
 </div>
 <h2>Evidence ledger</h2>
 <p>Record claims, sources, what supports them and what challenges them. Keep conclusions provisional.</p>
@@ -28,9 +29,12 @@
 </main>
 <dialog id="dlg"><form method="dialog">
 <label>Claim<textarea id="claim" required></textarea></label>
-<label>Perspective<select id="kind"><option>Scripture</option><option>Science</option><option>Philosophy</option><option>Human experience</option><option>History</option></select></label>
+<label>Perspective<select id="kind"><option>Scripture</option><option>Science</option><option>Philosophy</option><option>Human experience</option><option>History</option><option>Symbols &amp; language patterns</option></select></label>
 <label>Assessment<select id="status"><option>Unknown</option><option>Plausible</option><option>Supported</option><option>Disputed</option></select></label>
 <label>Source<input id="source"></label>
+<label>Observed symbol, wording or pattern<textarea id="pattern" placeholder="What can we actually see or verify?"></textarea></label>
+<label>Possible meaning or connection<textarea id="meaning" placeholder="What might it suggest? Keep this as a hypothesis."></textarea></label>
+<label>Alternative explanation<textarea id="alternative" placeholder="Could coincidence, translation, context or selection explain it?"></textarea></label>
 <label>What supports it?<textarea id="support"></textarea></label>
 <label>What challenges it?<textarea id="challenge"></textarea></label>
 <button id="save">Save evidence</button><button value="cancel">Cancel</button>
