@@ -219,8 +219,8 @@ ${JSON.stringify(existingConnections)}`;
     }
 
     const question = body && body.question;
-    if (typeof question !== "string" || !question.trim() || question.length > 10000) {
-      return json({ error: "Please enter a question of up to 10,000 characters." }, 400, allowedOrigin);
+    if (typeof question !== "string" || !question.trim() || question.length > 22000) {
+      return json({ error: "Please enter a question of up to 22,000 characters." }, 400, allowedOrigin);
     }
 
     try {
