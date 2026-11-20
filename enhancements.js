@@ -71,7 +71,8 @@
         ? "Found " + added.length + " new possible connection" + (added.length === 1 ? "" : "s") + ". They are marked as tentative leads for you to check."
         : "No new well-supported links found this time. I will check again when the evidence changes.");
     } catch (error) {
-      setStatus("Discovery paused: " + error.message + " It will retry after your evidence changes or when you reopen the app.");
+      setStatus("Discovery paused: " + error.message + " I will retry automatically in 30 seconds.");
+      scheduleDiscovery(30000);
     } finally {
       discoveryBusy = false;
     }
