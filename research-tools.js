@@ -37,7 +37,7 @@
     status("The Detective is reviewing your saved research. This may take a little while…");
     try {
       const context=boardContext();
-      const result=await requestInvestigation(promptBuilder(context),kind);
+      const result=await requestInvestigation(promptBuilder(context),kind,{fastReview:true});
       status(result ? "Finished. The review has been saved to your investigation archive and evidence ledger." : ( $("detectiveAnswer")?.textContent?.trim().slice(0,700) || "The review could not be completed. No detailed error was returned."));
     } finally {
       setBusy(button,false);
