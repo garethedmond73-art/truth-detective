@@ -219,6 +219,7 @@ ${JSON.stringify(existingConnections)}`;
     }
 
     const question = body && body.question;
+    const isBoardReview = body && body.mode === "board-review";
     if (typeof question !== "string" || !question.trim() || question.length > 22000) {
       return json({ error: "Please enter a question of up to 22,000 characters." }, 400, allowedOrigin);
     }
@@ -233,11 +234,13 @@ ${JSON.stringify(existingConnections)}`;
         body: JSON.stringify({
           model: env.OPENAI_MODEL || "gpt-6.2-astra",
           instructions: SYSTEM_PROMPT,
-          tools: [{ type: "web_search", search_context_size: "medium" }],
-          input: question,
-          max_output_tokens: 5000
+          ...(isBoardReview ? {} : { tools: [{ type: "web_search", search_context_size: "medium" }] }),
+          input: isBoardReview
+            ? "This is a fast synthesis of existing user-provided research notes. Do not perform web searches or invent citations. Clearly identify what the notes support, what is uncertain, contradictions, and the most useful next question. Keep the answer concise and practical.\\n\\n" + question
+            : question,
+          max_output_tokens: isBoardReview ? 2600 : 5000
         }),
-        signal: AbortSignal.timeout(90000)
+        signal: AbortSignal.timeout(isBoardReview ? 60000 : 90000)
       });
 
       const raw = await upstream.text();
@@ -264,7 +267,9 @@ ${JSON.stringify(existingConnections)}`;
       const timedOut = error?.name === "TimeoutError";
       return json({
         error: timedOut
-          ? "The investigation took too long. Please try a shorter question."
+          ? (isBoardReview
+              ? "The quick board review timed out. Please try again; your saved evidence has not been changed."
+              : "The investigation took too long. Please try again.")
           : "The detective could not reach the AI service. Please try again."
       }, 502, allowedOrigin);
     }
