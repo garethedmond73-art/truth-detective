@@ -23,3 +23,7 @@
 .network-node .network-degree{fill:#e0b66f;text-anchor:middle;font-weight:700;font-size:16px;pointer-events:none}
 .network-node:focus circle{stroke:#fff;stroke-width:5}
 @media(max-width:520px){.network-canvas-wrap svg{min-width:0;width:100%}.network-topic-label{font-size:17px}.network-explorer{padding:10px}}
+
+
+/* Automatic discovery and accessible map navigation */
+.map-tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.map-tools button{min-width:48px}.auto-discovery-panel{margin:14px 0;padding:14px;background:#1b2a33;border:1px solid #52636c;border-radius:10px}.auto-discovery-panel h4{color:#e0b66f;margin:0 0 6px}.auto-discovery-status{color:#e0b66f;font-weight:600}.auto-discovery-card{padding:12px;margin:10px 0;background:#21343c;border:1px solid #52636c;border-radius:9px}.auto-discovery-card strong{display:block;margin-bottom:6px}.auto-discovery-card a{color:#e0b66f;overflow-wrap:anywhere}.auto-discovery-tag{display:inline-block;margin:4px 6px 4px 0;padding:3px 8px;border-radius:20px;background:#354750;color:#edf3f5;font-size:.78rem}.network-canvas-wrap{overflow:auto;max-height:75vh;touch-action:pan-x pan-y}.network-canvas-wrap svg{width:100%;min-width:0;transform-origin:top left}.network-topic-label{font-size:12px}.network-node circle{stroke-width:2.5}.network-edge{stroke-width:2;opacity:.7}@media(max-width:520px){.map-tools button{flex:1}.auto-discovery-panel{padding:11px}.network-canvas-wrap{max-height:65vh}}
